@@ -11,6 +11,7 @@ import { isUnavailableBlocked, recordUnavailable } from './unavailable.js';
 import type { LinkedInActions } from '../../actions/types.js';
 import type { RunReport } from '../core/types.js';
 import { syncInviteSent } from '../../pipeline/contacts.js';
+import { FixedCooldownPolicy, type CooldownPolicy } from '../../pipeline/cooldown.js';
 import { asPipelineStore } from '../../pipeline/persist.js';
 
 export type CandidateSource = () => Promise<InviteCandidate[]> | InviteCandidate[];
@@ -27,6 +28,7 @@ export type InviteRunnerDeps = {
   notify?: NotifyHook;
   gateConfig?: GateConfig;
   config: InviteRunConfig;
+  cooldownPolicy?: CooldownPolicy;
 };
 
 function normalizeSlug(slug: string): string {
@@ -122,7 +124,14 @@ export async function runInvites(deps: InviteRunnerDeps): Promise<RunReport> {
       finalizeAttempt(store, attempt.id, status, { slug, result });
 
       if (status === 'rejected_limit') {
-        const until = new Date(Date.now() + config.cooldownDaysOnLimit * 86_400_000).toISOString();
+        const cooldownDays = config.cooldownDays ?? config.cooldownDaysOnLimit;
+        const policy = deps.cooldownPolicy ?? new FixedCooldownPolicy(cooldownDays * 86_400_000);
+        const now = Date.now();
+        const unlock = policy.nextEligibleAt(
+          { slug, lastInviteAt: new Date(now).toISOString(), limitHitAt: new Date(now).toISOString() },
+          now,
+        );
+        const until = new Date(unlock ?? now + cooldownDays * 86_400_000).toISOString();
         enterCooldown(store, until, 'FUSE_LIMIT_EXCEEDED');
         await deps.notify?.({ type: 'paused', reason: 'limit' });
         report.held = true;

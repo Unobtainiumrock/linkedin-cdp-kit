@@ -27,6 +27,7 @@ export type InviteRunConfig = {
   rollingWindowMs: number;
   rollingMaxInvites: number;
   cooldownDaysOnLimit: number;
+  cooldownDays?: number;
   unavailableBackoffHours: number[];
   securityWarningStops: boolean;
   minGapSec: number;

@@ -10,6 +10,14 @@ import { commentDraftId } from '../src/automation/comments/draft-id.js';
 import { inboundFingerprint, lastSenderIsSelf } from '../src/automation/messaging/ingest.js';
 import { dispatchOne, alreadySentForFingerprint } from '../src/automation/messaging/dispatch.js';
 import { runInvites } from '../src/automation/invites/runner.js';
+import { DEFAULT_INVITE_CONFIG } from '../src/automation/invites/config.js';
+import type { CooldownPolicy } from '../src/pipeline/cooldown.js';
+import { ingestAndQueueDrafts } from '../src/automation/messaging/ingest.js';
+import { readDrafts } from '../src/automation/messaging/queue.js';
+import { KeywordIntentRouter, TemplateReplyStrategy, TerminalNotInterestedStrategy, loadVoiceAndContext } from '../src/pipeline/messaging-plugins.js';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { InviteResult } from '../src/actions/invite.js';
 
 describe('gate ordering', () => {
@@ -195,5 +203,75 @@ describe('dedup fingerprint sends', () => {
     const store = new InMemoryStore();
     store.appendLedger({ status: 'sent', conversationUrn: 'u', inboundFp: 'fp1' });
     assert.equal(alreadySentForFingerprint(store, 'u', 'fp1'), true);
+  });
+});
+
+describe('cooldown policy on limit', () => {
+  it('uses the configured policy instead of a hardcoded duration', async () => {
+    const policy: CooldownPolicy = {
+      id: 'one_minute',
+      nextEligibleAt(_ctx, now = Date.now()) {
+        return now + 60_000;
+      },
+    };
+    const store = new InMemoryStore();
+    await runInvites({
+      store,
+      source: [{ slug: 'jane-example', name: 'Jane Example' }],
+      config: { ...DEFAULT_INVITE_CONFIG, dryRun: false, minGapSec: 0, maxGapSec: 0, cooldownDaysOnLimit: 7 },
+      cooldownPolicy: policy,
+      sendInvite: async () => ({ status: 'rejected_limit' }),
+    });
+    const until = Date.parse(String(store.readState().cooldownUntil));
+    assert.ok(Math.abs(until - (Date.now() + 60_000)) < 5_000);
+    assert.equal(store.readState().mode, 'cooldown');
+  });
+});
+
+describe('messaging ingest queue', () => {
+  it('drafts and does not send', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lcdp-ingest-'));
+    const result = await ingestAndQueueDrafts({
+      conversations: [
+        {
+          conversationUrn: 'urn:li:msg_conversation:EXAMPLE',
+          participants: [{ name: 'Jane Example', profileUrn: '', headline: '' }],
+          lastActivityAt: null,
+          createdAt: null,
+          unreadCount: 1,
+          read: false,
+          title: '',
+          lastMessagePreview: 'What is the price?',
+          messages: [{ sender: 'Jane Example', text: 'What is the price?', subject: '', timestamp: '1' }],
+        },
+        {
+          conversationUrn: 'urn:li:msg_conversation:STOP',
+          participants: [{ name: 'Jane Example', profileUrn: '', headline: '' }],
+          lastActivityAt: null,
+          createdAt: null,
+          unreadCount: 0,
+          read: true,
+          title: '',
+          lastMessagePreview: 'not interested',
+          messages: [{ sender: 'Jane Example', text: 'not interested', subject: '', timestamp: '2' }],
+        },
+      ],
+      selfName: 'Example User',
+      rootDir: dir,
+      router: new KeywordIntentRouter(),
+      strategies: [
+        new TerminalNotInterestedStrategy(),
+        new TemplateReplyStrategy('question', 'Thanks for the question. {{inbound}}'),
+      ],
+      voice: loadVoiceAndContext({}),
+    });
+    assert.equal(result.sent, false);
+    assert.equal(result.dryRun, true);
+    assert.equal(result.drafted, 1);
+    assert.equal(result.terminal, 1);
+    const drafts = readDrafts(dir);
+    assert.equal(drafts.length, 1);
+    assert.equal(drafts[0]?.status, 'pending');
+    assert.match(drafts[0]?.text ?? '', /Thanks for the question/);
   });
 });

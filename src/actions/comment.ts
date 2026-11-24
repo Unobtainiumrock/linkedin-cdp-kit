@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import type { ActionSession } from './types.js';
-import { inputInsertText, navigate, sleep, enablePage } from './cdp-util.js';
+import { COMMENT_POLL_SETTLE, COMMENT_TYPE_SETTLE, focusForInput, inputInsertText, navigate, settleDelay, enablePage, type SettleRange } from './cdp-util.js';
 
 export type CommentInput = { postUrl: string; text: string };
 
@@ -134,7 +134,7 @@ async function locateEditor(evaluate: ActionSession['evaluate']) {
   return JSON.parse(String(raw)) as { ok: boolean; reason?: string; count?: number };
 }
 
-async function fillEditor(session: ActionSession, text: string) {
+async function fillEditor(session: ActionSession, text: string, settle: SettleRange = COMMENT_TYPE_SETTLE) {
   const ready = JSON.parse(
     String(
       await session.evaluate(`(() => {
@@ -148,7 +148,7 @@ async function fillEditor(session: ActionSession, text: string) {
   ) as { ok: boolean; reason?: string };
   if (!ready.ok) return ready;
   await inputInsertText(session.cdp, text);
-  await sleep(300);
+  await settleDelay(settle);
   return JSON.parse(
     String(
       await session.evaluate(`(() => {
@@ -209,6 +209,8 @@ export type CommentOnPostOptions = {
   live?: boolean;
   expectedProfileSlug?: string;
   screenshotPath?: string;
+  settle?: SettleRange;
+  pollSettle?: SettleRange;
 };
 
 export async function commentOnPostLive(
@@ -227,6 +229,7 @@ export async function commentOnPostLive(
   let phase: 'pre_click' | 'clicking' | 'post_click' = 'pre_click';
   try {
     await enablePage(session.cdp);
+    await focusForInput(session.cdp);
     await navigate(session.cdp, input.postUrl);
     const page = await waitForPostPage(session.evaluate);
     if (!page.ok) throw new Error(page.reason || 'page_load_failed');
@@ -245,7 +248,7 @@ export async function commentOnPostLive(
       result.error = { code: 'duplicate_text_visible', message: 'Exact comment text already on page' };
       return result;
     }
-    const filled = await fillEditor(session, input.text);
+    const filled = await fillEditor(session, input.text, opts.settle ?? COMMENT_TYPE_SETTLE);
     if (!filled.ok) throw new Error(filled.reason || 'comment_text_not_retained');
     phase = 'clicking';
     const clicked = await clickSubmit(session.evaluate);
@@ -254,8 +257,9 @@ export async function commentOnPostLive(
     const slug = opts.expectedProfileSlug || session.publicIdentifier || '';
     const fast = process.env['LINKEDIN_CDP_FAST_NAV'] === '1';
     const deadline = Date.now() + (fast ? 50 : 15_000);
+    const poll = opts.pollSettle ?? COMMENT_POLL_SETTLE;
     while (Date.now() < deadline) {
-      await sleep(fast ? 1 : 500);
+      await settleDelay(poll);
       const evidence = JSON.parse(
         String(
           await session.evaluate(

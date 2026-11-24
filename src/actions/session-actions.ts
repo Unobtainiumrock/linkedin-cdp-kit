@@ -61,4 +61,8 @@ export class SessionLinkedInActions implements LinkedInActions {
   async verifySentInvites(recipientName: string) {
     return verifySentInvitesPage(this.actionSession(), recipientName);
   }
+
+  async pullThread(conversationUrn: string) {
+    return this.linkedInSession.pullThread(conversationUrn);
+  }
 }

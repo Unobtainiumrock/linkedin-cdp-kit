@@ -101,6 +101,7 @@ export interface ApprovalChannel {
   enqueue(store: PipelineStore, proposal: PendingProposal): void;
   approve(store: PipelineStore, id: string, text: string): boolean;
   reject(store: PipelineStore, id: string): void;
+  mark(store: PipelineStore, id: string, status: PendingProposal['status']): boolean;
 }
 
 export class LocalPendingQueueApprovalChannel implements ApprovalChannel {
@@ -131,6 +132,18 @@ export class LocalPendingQueueApprovalChannel implements ApprovalChannel {
     const next = rowsAfterReject(this.listPending(store), id);
     if (store.writePending) store.writePending(next);
     else writePendingProposals(store.rootDir, next);
+  }
+
+  mark(store: PipelineStore, id: string, status: PendingProposal['status']): boolean {
+    const rows = this.listPending(store);
+    const idx = rows.findIndex((p) => p.id === id);
+    if (idx < 0) return false;
+    const current = rows[idx];
+    if (!current) return false;
+    rows[idx] = { ...current, status };
+    if (store.writePending) store.writePending(rows);
+    else writePendingProposals(store.rootDir, rows);
+    return true;
   }
 }
 

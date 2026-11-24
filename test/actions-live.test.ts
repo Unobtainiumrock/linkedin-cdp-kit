@@ -97,6 +97,53 @@ describe('invite scripted', () => {
     assert.equal(r.detail, 'urn_mismatch');
   });
 
+  it('request-body urn mismatch yields uncertain', async () => {
+    const s = createScriptedActionSession({
+      dialogText: 'Personalize your invitation to Jane Example by adding a note.',
+      inviteRequestPostData: JSON.stringify({
+        invitee: { inviteeUnion: { memberProfile: 'urn:li:fsd_profile:OTHER' } },
+      }),
+      inviteResponse: {
+        status: 200,
+        body: JSON.stringify({
+          status: 200,
+          data: { status: 200, value: { invitationUrn: 'urn:li:fsd_invitation:EXAMPLE' } },
+        }),
+      },
+    });
+    const r = await sendConnectionInviteLive(
+      s,
+      { vanityName: 'jane-example', recipientName: 'Jane Example', expectedProfileUrn: 'urn:li:fsd_profile:EXPECTED' },
+      { live: true },
+    );
+    assert.equal(r.status, 'uncertain');
+    assert.equal(r.detail, 'urn_mismatch');
+  });
+
+  it('rejects extra invitation request fields', async () => {
+    const s = createScriptedActionSession({
+      dialogText: 'Personalize your invitation to Jane Example by adding a note.',
+      inviteRequestPostData: JSON.stringify({
+        invitee: { inviteeUnion: { memberProfile: 'urn:li:fsd_profile:EXPECTED' } },
+        trackingId: 'extra',
+      }),
+      inviteResponse: {
+        status: 200,
+        body: JSON.stringify({
+          status: 200,
+          data: { status: 200, value: { invitationUrn: 'urn:li:fsd_invitation:EXAMPLE' } },
+        }),
+      },
+    });
+    const r = await sendConnectionInviteLive(
+      s,
+      { vanityName: 'jane-example', recipientName: 'Jane Example', expectedProfileUrn: 'urn:li:fsd_profile:EXPECTED' },
+      { live: true },
+    );
+    assert.equal(r.status, 'uncertain');
+    assert.equal(r.detail, 'unexpected_request_fields');
+  });
+
   it('sent receipt', async () => {
     const s = createScriptedActionSession({
       dialogText: 'Personalize your invitation to Jane Example by adding a note.',

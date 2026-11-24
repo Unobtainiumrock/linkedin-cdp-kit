@@ -1,5 +1,5 @@
 import type { CdpSession } from '../cdp/session.js';
-import { navigate, sleep } from './cdp-util.js';
+import { SEND_VERIFY_SETTLE, focusForInput, navigate, settleDelay } from './cdp-util.js';
 import type { ActionSession, DomSendResult, SendMessageOpts } from './types.js';
 
 export function threadIdFromUrn(conversationUrn: string): string {
@@ -218,41 +218,18 @@ export async function sendMessageLive(
 
   if (tryDom) {
     try {
+      await focusForInput(session.cdp);
       await navigate(session.cdp, `https://www.linkedin.com/messaging/thread/${threadId}/`);
       const ready = await waitForCompose(session.evaluate);
       result.attempts.push({ step: 'wait_compose', status: ready });
-      if (ready !== 'ready') {
-        return {
-          ok: false,
-          reason: 'compose_box_not_ready',
-          conversationUrn,
-          threadId,
-          attempts: result.attempts,
-        };
-      }
+      if (ready !== 'ready') throw new Error('compose_box_not_ready');
       const typed = await focusAndType(session.evaluate, text);
       result.attempts.push({ step: 'type', ...typed });
-      if (!typed.ok) {
-        return {
-          ok: false,
-          reason: typed.reason || 'type_failed',
-          conversationUrn,
-          threadId,
-          attempts: result.attempts,
-        };
-      }
+      if (!typed.ok) throw new Error(typed.reason || 'type_failed');
       const clicked = await clickSend(session.evaluate);
       result.attempts.push({ step: 'click_send', ...clicked });
-      if (!clicked.ok) {
-        return {
-          ok: false,
-          reason: clicked.reason || 'click_send_failed',
-          conversationUrn,
-          threadId,
-          attempts: result.attempts,
-        };
-      }
-      await sleep(1_500);
+      if (!clicked.ok) throw new Error(clicked.reason || 'click_send_failed');
+      await settleDelay(opts.settle ?? SEND_VERIFY_SETTLE);
       const verified = await verifyLastMessage(session.evaluate, userName, text);
       result.attempts.push({ step: 'verify', ...verified });
       return {
@@ -265,14 +242,18 @@ export async function sendMessageLive(
         attempts: result.attempts,
       };
     } catch (err) {
-      result.attempts.push({ step: 'dom_error', error: err instanceof Error ? err.message : String(err) });
-      return {
-        ok: false,
-        reason: err instanceof Error ? err.message : 'dom_failed',
-        conversationUrn,
-        threadId,
-        attempts: result.attempts,
-      };
+      const message = err instanceof Error ? err.message : 'dom_failed';
+      result.reason = message;
+      result.attempts.push({ step: 'dom_error', error: message });
+      if (!tryVoyager) {
+        return {
+          ok: false,
+          reason: message,
+          conversationUrn,
+          threadId,
+          attempts: result.attempts,
+        };
+      }
     }
   }
 

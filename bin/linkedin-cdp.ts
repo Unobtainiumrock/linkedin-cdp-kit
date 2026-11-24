@@ -6,10 +6,13 @@ import { SessionLinkedInActions } from '../src/actions/session-actions.js';
 import { FileStore } from '../src/automation/core/store.js';
 import { runInvites, inviteStatus, resumeInvites } from '../src/automation/invites/runner.js';
 import { DEFAULT_INVITE_CONFIG } from '../src/automation/invites/config.js';
-import { loadHooksModule } from '../src/cli/hooks.js';
+import { loadHooksModule, messagingRouterFromHooks, messagingStrategiesFromHooks } from '../src/cli/hooks.js';
 import { readPendingProposals, writePendingProposals } from '../src/automation/core/pending.js';
 import { approveProposal, runCommentExecutor, type PendingProposal } from '../src/automation/comments/pipeline.js';
+import { LocalPendingQueueApprovalChannel } from '../src/pipeline/comments-plugins.js';
 import { readDrafts, writeDrafts, type MessageDraft } from '../src/automation/messaging/queue.js';
+import { ingestAndQueueDrafts } from '../src/automation/messaging/ingest.js';
+import { loadVoiceAndContext } from '../src/pipeline/messaging-plugins.js';
 import { dispatchOne } from '../src/automation/messaging/dispatch.js';
 import { asPipelineStore } from '../src/pipeline/persist.js';
 import { runRefill, JsonFileSource, CsvFileSource, type InviteQueueEntry } from '../src/pipeline/discovery.js';
@@ -183,7 +186,8 @@ async function main(): Promise<void> {
       return;
     }
     if (sub === 'run') {
-      const proposals = readPendingProposals(stateDir).filter((p) => p.status === 'approved') as PendingProposal[];
+      const channel = new LocalPendingQueueApprovalChannel();
+      const proposals = channel.listPending(store).filter((p) => p.status === 'approved') as PendingProposal[];
       if (!live) {
         console.log(JSON.stringify({ dryRun: true, count: proposals.length }));
         return;
@@ -197,6 +201,8 @@ async function main(): Promise<void> {
           const r = await actions.commentOnPost(postUrl, text, { live: true, expectedProfileSlug: undefined });
           return { status: r.status };
         },
+        undefined,
+        channel,
       );
       console.log(JSON.stringify(report, null, 2));
       return;
@@ -211,10 +217,37 @@ async function main(): Promise<void> {
       return;
     }
     if (sub === 'ingest') {
-      if (!cdpUrl) throw new Error('--cdp-url required');
-      const actions = await connectActionsLive();
-      const convos = await actions.listConversations({ days: Number(flag('--days') ?? '14') });
-      console.log(JSON.stringify({ count: convos.length, dryRun: !live }));
+      const conversationsPath = flag('--conversations');
+      if (!cdpUrl && !conversationsPath) throw new Error('--cdp-url or --conversations is required');
+      const hooks = hooksPath ? await loadHooksModule(hooksPath) : {};
+      let convos: Awaited<ReturnType<SessionLinkedInActions['listConversations']>> = [];
+      let selfName = flag('--self') ?? null;
+      if (conversationsPath) {
+        convos = JSON.parse(readFileSync(conversationsPath, 'utf8')) as typeof convos;
+      } else {
+        const actions = await connectActionsLive();
+        try {
+          selfName = selfName ?? actions.linkedInSession.me?.displayName ?? null;
+          const listed = await actions.listConversations({ days: Number(flag('--days') ?? '14') });
+          const filled = [];
+          for (const convo of listed) {
+            if (convo.messages.length > 0) filled.push(convo);
+            else filled.push({ ...convo, messages: await actions.getMessages(convo.conversationUrn) });
+          }
+          convos = filled;
+        } finally {
+          await actions.linkedInSession.close();
+        }
+      }
+      const result = await ingestAndQueueDrafts({
+        conversations: convos,
+        selfName,
+        rootDir: stateDir,
+        router: messagingRouterFromHooks(hooks),
+        strategies: messagingStrategiesFromHooks(hooks),
+        voice: hooks.voice ?? loadVoiceAndContext({}),
+      });
+      console.log(JSON.stringify(result, null, 2));
       return;
     }
     if (sub === 'approve') {
@@ -277,7 +310,22 @@ async function main(): Promise<void> {
     if (!cdpUrl) throw new Error('--cdp-url required');
     const actions = await connectActionsLive();
     try {
-      console.log(JSON.stringify(await scrapeConnections({ live }), null, 2));
+      const cdp = actions.linkedInSession.session;
+      if (!cdp) throw new Error('CDP session missing');
+      console.log(
+        JSON.stringify(
+          await scrapeConnections({
+            live,
+            anchorCap: Number(flag('--cap') ?? '300'),
+            session: {
+              cdp,
+              evaluate: (expression, timeoutMs) => cdp.evaluate(expression, timeoutMs),
+            },
+          }),
+          null,
+          2,
+        ),
+      );
     } finally {
       await actions.linkedInSession.close();
     }
@@ -294,9 +342,16 @@ async function main(): Promise<void> {
         console.log(JSON.stringify(await actions.fetchProfile(slug!, { posts: argv.includes('--posts') }), null, 2));
         break;
       }
-      case 'inbox':
+      case 'inbox': {
+        const thread = flag('--thread');
+        if (argv.includes('--history')) {
+          if (!thread) throw new Error('inbox --history requires --thread <urn>');
+          console.log(JSON.stringify(await actions.pullThread(thread), null, 2));
+          break;
+        }
         console.log(JSON.stringify(await actions.listConversations({ days: Number(flag('--days') ?? '14') }), null, 2));
         break;
+      }
       default:
         throw new Error(`unknown command: ${cmd}`);
     }

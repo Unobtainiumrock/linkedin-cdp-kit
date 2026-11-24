@@ -6,7 +6,8 @@ import { parseProfile } from './parse/profile.js';
 import { checkAccountGuard, type ExpectedAccount } from './session/account-guard.js';
 import { listConversations, type ListConversationsOptions } from './voyager/inbox.js';
 import { pullProfile } from './voyager/profile-pull.js';
-import type { ParsedConversation } from './parse/messaging.js';
+import type { ParsedConversation, ParsedMessage } from './parse/messaging.js';
+import { pullThread as pullThreadDom, type PullThreadOptions } from './actions/scrape-thread.js';
 import type { PullProfileResult } from './voyager/profile-pull.js';
 
 export type LinkedInSessionConnectOptions = {
@@ -151,6 +152,15 @@ export class LinkedInSession {
         mailboxUrn: this.me!.mailboxUrn,
         evaluate: (expr, t) => this.session!.evaluate(expr, t),
       },
+      opts,
+    );
+  }
+
+  async pullThread(conversationUrn: string, opts?: PullThreadOptions): Promise<ParsedMessage[] | null> {
+    this.assertConnected();
+    return pullThreadDom(
+      { cdp: this.session!, evaluate: (expr, timeoutMs) => this.session!.evaluate(expr, timeoutMs) },
+      conversationUrn,
       opts,
     );
   }

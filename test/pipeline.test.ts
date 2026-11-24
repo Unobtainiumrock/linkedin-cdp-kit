@@ -4,6 +4,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { InMemoryStore } from '../src/automation/core/store.js';
+import { captureAndDraft, runCommentExecutor } from '../src/automation/comments/pipeline.js';
 import { asPipelineStore } from '../src/pipeline/persist.js';
 import { JsonFileSource, CsvFileSource, runRefill, countEligibleQueue, DEFAULT_REFILL_CONFIG } from '../src/pipeline/discovery.js';
 import { defaultScoreGrader, orderQualifiedQueue, applyGradeToQueueAsync, readResearchQueue } from '../src/pipeline/grading.js';
@@ -149,6 +150,109 @@ describe('comments plugins', () => {
       now,
     );
     assert.equal(targets.length, 0);
+  });
+
+  it('capture revises once before the content filter', async () => {
+    const store = new InMemoryStore();
+    let calls = 0;
+    const out = await captureAndDraft(
+      store,
+      [{ slug: 'jane-example' }],
+      async () => [
+        {
+          text: 'A note about capacity planning and cost.',
+          author: 'Jane Example',
+          age: null,
+          urn: 'urn:li:activity:7442063467911548929',
+          activityId: '7442063467911548929',
+        },
+      ],
+      (_post, ctx) => {
+        calls += 1;
+        if (ctx.lintFindings?.length) return { text: 'short and fine' };
+        return { text: 'x'.repeat(80) };
+      },
+      {
+        dryRun: true,
+        freshnessHours: 24 * 365 * 30,
+        approvalPolicy: 'manual',
+        circuitBreakerThreshold: 2,
+        maxPerDay: 5,
+        minGapMs: 0,
+      },
+      {
+        referenceBundle: { voice: '', rules: '', product: '', examples: [] },
+        styleLinters: [builtinMaxLengthLinter(20)],
+      },
+    );
+    assert.equal(calls, 2);
+    assert.equal(out.length, 1);
+    assert.equal(out[0]?.text, 'short and fine');
+    assert.equal(store.readPending?.()?.length, 1);
+  });
+
+  it('executor reads approved drafts from the channel', async () => {
+    const store = asPipelineStore(new InMemoryStore());
+    const channel = new LocalPendingQueueApprovalChannel();
+    channel.enqueue(store, {
+      id: 'draft-1',
+      slug: 'jane-example',
+      activityId: '1',
+      text: 'Approved comment text.',
+      createdAt: new Date().toISOString(),
+      status: 'approved',
+    });
+    const report = (await runCommentExecutor(
+      store,
+      [],
+      {
+        dryRun: true,
+        freshnessHours: 48,
+        approvalPolicy: 'manual',
+        circuitBreakerThreshold: 2,
+        maxPerDay: 5,
+        minGapMs: 0,
+        maxGapMs: 0,
+      },
+      async () => ({ status: 'posted' }),
+      undefined,
+      channel,
+    )) as { actions: Array<{ draftId?: string; status?: string }> };
+    assert.equal(report.actions.length, 1);
+    assert.equal(report.actions[0]?.draftId, 'draft-1');
+    assert.equal(report.actions[0]?.status, 'dry_run');
+  });
+
+  it('target selector drops cooled authors', async () => {
+    const store = new InMemoryStore();
+    const out = await captureAndDraft(
+      store,
+      [{ slug: 'cooled' }],
+      async () => [
+        {
+          text: 'A fresh post about systems.',
+          author: 'Cooled Person',
+          age: null,
+          urn: 'urn:li:activity:1',
+          activityId: '7442063467911548929',
+        },
+      ],
+      () => ({ text: 'A distinct reply about the point.' }),
+      {
+        dryRun: true,
+        freshnessHours: 24 * 365 * 30,
+        approvalPolicy: 'manual',
+        circuitBreakerThreshold: 2,
+        maxPerDay: 5,
+        minGapMs: 0,
+      },
+      {
+        targetSelector: new TargetRotationSelector({ authorCooldownDays: 14 }),
+        contacts: [{ slug: 'cooled', name: 'Cooled Person', state: 'connected', optOut: false, updatedAt: '' }],
+        recentPosters: [{ slug: 'cooled', name: 'Cooled Person', lastCommentAt: new Date().toISOString() }],
+      },
+    );
+    assert.equal(out.length, 0);
   });
 
   it('approval channel', () => {

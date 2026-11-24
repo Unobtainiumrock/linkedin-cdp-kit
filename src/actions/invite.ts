@@ -5,7 +5,17 @@ import {
   recipientDialogMatches,
 } from './classify-invite.js';
 import type { ActionSession, InviteCandidateInput, InviteSendOpts, VerifySentResult } from './types.js';
-import { SHADOW_HELPERS, awaitNetworkResponse, getResponseBody, navigate, actionSleep, enablePage } from './cdp-util.js';
+import {
+  INVITE_SETTLE,
+  SHADOW_HELPERS,
+  awaitNetworkResponse,
+  enablePage,
+  focusForInput,
+  getRequestPostData,
+  getResponseBody,
+  navigate,
+  settleDelay,
+} from './cdp-util.js';
 
 export type ConnectionInviteResult =
   | { status: 'dry_run'; url: string; recipientName: string }
@@ -103,13 +113,15 @@ export async function sendConnectionInviteLive(
   if (!opts.live) return { status: 'dry_run', url, recipientName: candidate.recipientName };
 
   await enablePage(session.cdp);
+  await focusForInput(session.cdp);
   await navigate(session.cdp, url);
-  await actionSleep(2_000);
+  await settleDelay(opts.settle ?? INVITE_SETTLE);
   let dialogText = await readDialogText(session);
   let inspect = await inspectInviteSurface(session, dialogText, candidate);
   if (inspect === 'unavailable' && opts.useProfileFallback) {
+    await focusForInput(session.cdp);
     await navigate(session.cdp, `https://www.linkedin.com/in/${candidate.vanityName}/`);
-    await actionSleep(2_000);
+    await settleDelay(opts.settle ?? INVITE_SETTLE);
     const clicked = await clickProfileConnect(session, candidate);
     if (clicked === 'not_found') return { status: 'unavailable', detail: 'profile_connect_missing' };
     dialogText = await readDialogText(session);
@@ -147,28 +159,57 @@ export async function sendConnectionInviteLive(
   if (classified.result === 'sent' && classified.value) {
     const urn = classified.value['invitationUrn'];
     if (typeof urn === 'string') {
-      if (candidate.expectedProfileUrn) {
-        const reqRaw = await session.evaluate(`(() => null)()`);
-        void reqRaw;
-        const bodyStr = bodyText;
-        if (candidate.expectedProfileUrn && !bodyStr.includes(candidate.expectedProfileUrn.split(':').pop() || '')) {
-          const invitee = classified.value['inviteeUrn'];
-          if (typeof invitee === 'string' && invitee !== candidate.expectedProfileUrn) {
-            return { status: 'uncertain', detail: 'urn_mismatch' };
-          }
-        }
-      }
+      const postData = capture.postData ?? (await getRequestPostData(session.cdp, capture.requestId));
+      const verdict = verifyInviteRequestBody(postData, candidate.expectedProfileUrn, classified.value);
+      if (!verdict.ok) return { status: 'uncertain', detail: verdict.detail };
       return { status: 'sent', invitationUrn: urn };
     }
   }
   return { status: 'uncertain' };
 }
 
+export function verifyInviteRequestBody(
+  postData: string | null | undefined,
+  expectedProfileUrn: string | undefined,
+  responseValue: Record<string, unknown> | null,
+): { ok: true } | { ok: false; detail: 'urn_mismatch' | 'unexpected_request_fields' | 'bad_request_json' } {
+  if (!postData) {
+    const invitee = responseValue?.['inviteeUrn'];
+    if (expectedProfileUrn && typeof invitee === 'string' && invitee !== expectedProfileUrn) {
+      return { ok: false, detail: 'urn_mismatch' };
+    }
+    return { ok: true };
+  }
+  let request: unknown;
+  try {
+    request = JSON.parse(postData);
+  } catch {
+    return { ok: false, detail: 'bad_request_json' };
+  }
+  if (!request || typeof request !== 'object' || Array.isArray(request)) {
+    return { ok: false, detail: 'unexpected_request_fields' };
+  }
+  const keys = Object.keys(request);
+  if (keys.length !== 1 || keys[0] !== 'invitee') {
+    return { ok: false, detail: 'unexpected_request_fields' };
+  }
+  const person = (request as { invitee?: { inviteeUnion?: { memberProfile?: unknown } } }).invitee?.inviteeUnion
+    ?.memberProfile;
+  if (typeof person !== 'string') return { ok: false, detail: 'urn_mismatch' };
+  if (expectedProfileUrn && person !== expectedProfileUrn) return { ok: false, detail: 'urn_mismatch' };
+  const responseInvitee = responseValue?.['inviteeUrn'];
+  if (typeof responseInvitee === 'string' && responseInvitee !== person) {
+    return { ok: false, detail: 'urn_mismatch' };
+  }
+  return { ok: true };
+}
+
 export async function verifySentInvites(session: ActionSession, recipientName: string): Promise<VerifySentResult> {
   const tokens = recipientName.toLowerCase().split(/\s+/).filter(Boolean);
   const last = tokens[tokens.length - 1] || recipientName;
+  await focusForInput(session.cdp);
   await navigate(session.cdp, 'https://www.linkedin.com/mynetwork/invitation-manager/sent/');
-  await actionSleep(2_000);
+  await settleDelay(INVITE_SETTLE);
   const raw = await session.evaluate(`(() => {
     const fn = () => /People\\s*\\(?\\d/.test(document.body.innerText);
     return JSON.stringify({

@@ -122,4 +122,25 @@ describe('pullProfilePosts partial flags', () => {
     assert.equal(result.complete, false);
     assert.match(result.error || '', /429/);
   });
+
+  it('marks a stalled cursor incomplete and an empty page complete', async () => {
+    const page = JSON.stringify({
+      included: [
+        {
+          entityUrn: 'urn:li:activity:7442063467911548929',
+          commentary: { text: { text: 'One post' } },
+        },
+      ],
+    });
+    const stalled = await pullProfilePosts(fakeSession([page, page]), 'urn:li:fsd_profile:EXAMPLE', { delayMs: 0 });
+    assert.equal(stalled.complete, false);
+    assert.match(stalled.error || '', /stalled/);
+    assert.equal(stalled.posts.length, 1);
+
+    const empty = JSON.stringify({ included: [] });
+    const done = await pullProfilePosts(fakeSession([page, empty]), 'urn:li:fsd_profile:EXAMPLE', { delayMs: 0 });
+    assert.equal(done.complete, true);
+    assert.equal(done.error, null);
+    assert.equal(done.posts.length, 1);
+  });
 });

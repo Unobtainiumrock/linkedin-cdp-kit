@@ -50,13 +50,28 @@ export { validateCommentInput, editorTextFromDom, commentOnPost, commentOnPostLi
 export {
   sendConnectionInviteLive,
   parseRelationshipsIntercept,
+  verifyInviteRequestBody,
   type ConnectionInviteResult,
   RELATIONSHIPS_POST_PATH,
   customInviteUrl,
   verifySentInvites,
 } from './actions/invite.js';
 export { classifyInviteResponse, recipientDialogMatches, type InviteClassification } from './actions/classify-invite.js';
-export { scrapeConnections, CONNECTIONS_PAGE_URL, type ScrapeConnectionsResult, type ScrapedConnection } from './actions/scrape-connections.js';
+export {
+  scrapeConnections,
+  connectionCardFromText,
+  CONNECTIONS_PAGE_URL,
+  CONNECTION_HARVEST_EXPR,
+  type ScrapeConnectionsResult,
+  type ScrapedConnection,
+  type ScrapeSession,
+} from './actions/scrape-connections.js';
+export {
+  pullThread,
+  resolveDateHeading,
+  resolveThreadTimestamp,
+  type PullThreadOptions,
+} from './actions/scrape-thread.js';
 export { LinkedInMessageListener, type InboundMessage } from './actions/listen.js';
 
 export { captureGraphqlQueryIds, extractQueryIdFromUrl, type CapturedQueryId } from './tools/capture-query-ids.js';
@@ -69,9 +84,9 @@ export { FileStore, InMemoryStore, type Store } from './automation/core/store.js
 export { evaluateGates, resumeFromReview, enterReviewHold, enterCooldown } from './automation/core/gates.js';
 export { runInvites, inviteStatus, resumeInvites } from './automation/invites/runner.js';
 export { filterCommentContent, BENIGN_COMMENT_SAMPLE } from './automation/comments/content-filter.js';
-export { captureAndDraft, runCommentExecutor, approveProposal } from './automation/comments/pipeline.js';
+export { captureAndDraft, runCommentExecutor, approveProposal, type CaptureAndDraftOptions } from './automation/comments/pipeline.js';
 export { dispatchOne } from './automation/messaging/dispatch.js';
-export { inboundFingerprint, ingestConversation } from './automation/messaging/ingest.js';
+export { inboundFingerprint, ingestConversation, ingestAndQueueDrafts, type IngestQueueResult } from './automation/messaging/ingest.js';
 export { sanitizeInbound, validateOutbound } from './automation/messaging/safety.js';
 
 export * from './pipeline/strategy.js';

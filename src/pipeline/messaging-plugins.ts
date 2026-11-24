@@ -15,7 +15,9 @@ export type IntentClassification = {
 };
 
 export interface IntentRouter {
-  classify(inbound: { text: string; fingerprint: string }): IntentClassification;
+  classify(
+    inbound: { text: string; fingerprint: string },
+  ): IntentClassification | Promise<IntentClassification>;
 }
 
 export interface ReplyStrategy {
@@ -93,7 +95,7 @@ export async function routeAndDraft(
   inbound: { text: string; fingerprint: string; conversationUrn: string },
   voice: VoiceAndContext,
 ): Promise<{ intent: MessageIntent; text: string; terminal: boolean }> {
-  const cls = router.classify(inbound);
+  const cls = await router.classify(inbound);
   if (cls.terminal) return { intent: cls.intent, text: '', terminal: true };
   const strat = strategies.find((s) => s.intent === cls.intent) ?? strategies.find((s) => s.intent === 'other');
   if (!strat) return { intent: cls.intent, text: '', terminal: false };

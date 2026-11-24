@@ -22,12 +22,14 @@ export interface LinkedInActions {
   commentOnPost(postUrl: string, text: string, opts?: CommentPostOpts): Promise<CommentLiveResult>;
   sendConnectionInvite(candidate: InviteCandidateInput, opts?: InviteSendOpts): Promise<ConnectionInviteResult>;
   verifySentInvites(recipientName: string): Promise<VerifySentResult>;
+  pullThread(conversationUrn: string): Promise<ParsedMessage[] | null>;
 }
 
 export type SendMessageOpts = {
   live?: boolean;
   allowVoyagerFallback?: boolean;
   mode?: 'dom' | 'voyager' | 'auto';
+  settle?: { minMs: number; maxMs: number };
 };
 
 export type DomSendResult =
@@ -56,6 +58,8 @@ export type CommentPostOpts = {
   live?: boolean;
   expectedProfileSlug?: string;
   screenshotPath?: string;
+  settle?: { minMs: number; maxMs: number };
+  pollSettle?: { minMs: number; maxMs: number };
 };
 
 export type InviteCandidateInput = {
@@ -70,6 +74,7 @@ export type InviteSendOpts = {
   live?: boolean;
   useProfileFallback?: boolean;
   dryRunNavigate?: boolean;
+  settle?: { minMs: number; maxMs: number };
 };
 
 export type VerifySentResult = {

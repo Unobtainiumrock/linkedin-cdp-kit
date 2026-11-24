@@ -5,6 +5,7 @@ export type ScriptProfile = {
   composeReady?: boolean;
   commentPosted?: boolean;
   inviteResponse?: { status: number; body: string };
+  inviteRequestPostData?: string;
   dialogText?: string;
   sentPageOk?: boolean;
 };
@@ -18,6 +19,9 @@ export function createScriptedActionSession(profile: ScriptProfile, overrides: P
       if (method === 'Network.getResponseBody') {
         return { body: profile.inviteResponse?.body ?? '{}' };
       }
+      if (method === 'Network.getRequestPostData') {
+        return { postData: profile.inviteRequestPostData ?? '' };
+      }
       return {};
     },
     waitForEvent: async () => {},
@@ -26,12 +30,30 @@ export function createScriptedActionSession(profile: ScriptProfile, overrides: P
     onMessage: (h: (raw: string) => void) => {
       if (profile.inviteResponse) {
         setTimeout(() => {
+          if (profile.inviteRequestPostData) {
+            h(
+              JSON.stringify({
+                method: 'Network.requestWillBeSent',
+                params: {
+                  requestId: 'req-1',
+                  request: {
+                    method: 'POST',
+                    url: 'https://www.linkedin.com/voyager/api/voyagerRelationshipsDashMemberRelationships',
+                    postData: profile.inviteRequestPostData,
+                  },
+                },
+              }),
+            );
+          }
           h(
             JSON.stringify({
               method: 'Network.responseReceived',
               params: {
                 requestId: 'req-1',
-                response: { url: '/voyager/api/voyagerRelationshipsDashMemberRelationships', status: profile.inviteResponse!.status },
+                response: {
+                  url: 'https://www.linkedin.com/voyager/api/voyagerRelationshipsDashMemberRelationships',
+                  status: profile.inviteResponse!.status,
+                },
               },
             }),
           );

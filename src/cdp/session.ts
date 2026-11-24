@@ -121,6 +121,14 @@ export class CdpSession {
     await this.send('Page.bringToFront', {}, 5_000);
   }
 
+  async setFocusEmulation(enabled: boolean): Promise<void> {
+    try {
+      await this.send('Emulation.setFocusEmulationEnabled', { enabled }, 5_000);
+    } catch {
+      /* Optional. Older targets and scripted fakes may not implement it. */
+    }
+  }
+
   waitForEvent(eventName: string, timeoutMs = 30_000): Promise<Record<string, unknown>> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {

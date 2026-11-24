@@ -84,8 +84,11 @@ export async function pullProfilePosts(
       break;
     }
 
+    // A repeated cursor is not a natural end. A 429 is already an apiError.
+    // An empty page is the path that sets complete.
     if (usedTokens.has(nextToken)) {
-      complete = true;
+      error = `page ${page}: pagination cursor stalled`;
+      log(`  ${error}`);
       break;
     }
     usedTokens.add(nextToken);
