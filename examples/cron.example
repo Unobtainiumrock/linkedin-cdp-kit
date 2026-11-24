@@ -1,0 +1,2 @@
+# Example cron (parameterize paths and CDP_URL). Machine must be awake; Chrome headed + logged in.
+# 0 9,13,17 * * 1-5 cd /var/lib/linkedin-cdp-kit && CDP_URL=http://127.0.0.1:9222 node --import tsx /opt/linkedin-cdp-kit/bin/linkedin-cdp.ts invites run --state-dir ./invites-state >>/var/log/linkedin-invites.log 2>&1

@@ -1,0 +1,9 @@
+[Unit]
+Description=LinkedIn invite automation (parameterize)
+After=network.target
+
+[Service]
+Type=oneshot
+Environment=CDP_URL=http://127.0.0.1:9222
+WorkingDirectory=/var/lib/linkedin-cdp-kit/invites
+ExecStart=/usr/bin/node --import tsx /opt/linkedin-cdp-kit/bin/linkedin-cdp.ts invites run --cdp-url ${CDP_URL} --state-dir ${WORKING_DIRECTORY}

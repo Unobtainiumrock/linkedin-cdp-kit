@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "globalDisqualifiers": ["student", "recruiter-only"],
+  "personas": [
+    {
+      "id": "platform-lead",
+      "title": "Platform engineering lead",
+      "tiers": ["tier1", "tier2"],
+      "categories": ["champion", "buyer"],
+      "disqualifiers": ["agency-only"],
+      "evidenceRules": ["mentions platform team", "owns developer experience"]
+    }
+  ]
+}

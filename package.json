@@ -1,0 +1,28 @@
+{
+  "name": "linkedin-cdp-kit",
+  "version": "0.1.0",
+  "description": "LinkedIn automation via CDP and Voyager APIs using your own Chrome session",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "LINKEDIN_CDP_FAST_NAV=1 node --import tsx --test 'test/**/*.test.ts'",
+    "pii-grep": "node scripts/pii-grep.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "ws": "^8.18.0",
+    "@types/ws": "^8.5.13"
+  }
+}
