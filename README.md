@@ -1,8 +1,113 @@
 # linkedin-cdp-kit
 
-TypeScript library for reading and interacting with LinkedIn through **your own** logged-in Chrome session via the Chrome DevTools Protocol (CDP) and LinkedIn's internal Voyager REST/GraphQL APIs.
+TypeScript library for reading and interacting with LinkedIn through **your own** logged-in Chrome session via CDP and Voyager APIs.
 
 This is **unofficial**. LinkedIn's web UI and internal APIs change without notice. Automated use may violate LinkedIn's Terms of Service and can trigger rate limits or account restrictions. **You are responsible for compliance and pacing.**
+
+## Capability map
+
+Four automation lanes sit on shared session infrastructure: logged-in Chrome via CDP, Voyager-backed reads, and safety gates (dry-run unless `--live`, account guard, pacing, no auto-retry after uncertain outcomes).
+
+```mermaid
+flowchart TB
+  subgraph lanes["Automation lanes"]
+    C[Content]
+    O[Outreach]
+    M[Messaging]
+    A[Applications]
+  end
+  subgraph shared["Shared foundation"]
+    CDP[Logged-in Chrome via CDP]
+    V[Voyager reads / DOM actions]
+    S[Safety gates]
+  end
+  C --> CDP
+  O --> CDP
+  M --> CDP
+  A --> CDP
+  CDP --> V
+  V --> S
+```
+
+Import lane namespaces from the package entry:
+
+```ts
+import { content, outreach, messaging, applications } from 'linkedin-cdp-kit';
+```
+
+## Content automation
+
+Feed reads, reactions, shares, comment actions, and the comment capture → draft → approve → execute pipeline. Plugins cover reference bundles, style linting, target rotation, and outbound content filtering.
+
+| What you can do | API (`content.*`) | CLI |
+|-----------------|-------------------|-----|
+| Read the home feed | `readFeed` | — |
+| React to a post | `reactToPost` | — |
+| Share a post | `sharePost` | — |
+| List comments on a post | `listComments` | — |
+| Post a comment (live) | `commentOnPostLive` | `comments run --live` |
+| Reply to a comment | `replyToComment` | — |
+| Capture posts and draft comments | `captureAndDraft` | `comments capture <slug>` |
+| Approve a pending comment | `approveProposal` | `comments approve <id> --text` |
+| Execute approved comments | `runCommentExecutor` | `comments run --live` |
+| Load reference bundle files | `loadReferenceBundle` | — |
+| Style linter (max length, etc.) | `builtinMaxLengthLinter`, `draftWithReviseOnce` | — |
+| Target rotation selector | `TargetRotationSelector` | — |
+| Content filter / refusal rules | `filterCommentContent`, `contentRefusal` | — |
+
+List pending proposals: `comments list`.
+
+## Outreach automation
+
+People search, connectability probes, connection invites, discovery refill, grading, profile verify, the contact ledger, connection scraping, cooldown policies, and unavailable-profile audit.
+
+| What you can do | API (`outreach.*`) | CLI |
+|-----------------|-------------------|-----|
+| Search people (Voyager + DOM) | `searchPeople` | — |
+| Probe connect / follow / pending | `probeConnectability` | — |
+| Send connection invite (live) | `sendConnectionInviteLive` | `invites run --live` |
+| Invite runner status / resume | `runInvites`, `inviteStatus`, `resumeInvites` | `invites status`, `invites run --live`, `invites resume --reason` |
+| Discovery refill into queue | `runRefill` | `refill --json` / `--csv` |
+| Grade / qualify candidates | `defaultScoreGrader`, `applyGradeToQueue`, `orderQualifiedQueue` | — |
+| Profile verify for research queue | `runVerify` | `verify [--live]` |
+| Contact ledger read / import | `readContactLedger`, `listContacts`, `importConnectionsCsv` | `contacts list`, `contacts import-csv <file>` |
+| Scrape connections page | `scrapeConnections` | `connections --cdp-url` |
+| Cooldown policies | `FixedCooldownPolicy`, `BayesianCooldownPolicy`, … | — |
+| Unavailable slug audit | `auditUnavailable`, `applyUnavailableAudit` | `audit-unavailable --probes <json> [--apply]` |
+
+## Messaging automation
+
+Inbox listing, thread history, send and send-by-name resolution, realtime listen, ingest → drafts, follow-up nudges, and intent routing.
+
+| What you can do | API (`messaging.*`) | CLI |
+|-----------------|---------------------|-----|
+| List inbox conversations | `listConversations` | `inbox --cdp-url` |
+| Pull full thread history | `pullThread` | `inbox --history --thread <urn>` |
+| Send a message (live) | `sendMessageLive` | `messaging send --live` |
+| Match thread by participant name | `matchConversationsByName` | — |
+| Listen for inbound messages | `LinkedInMessageListener` | — |
+| Ingest threads and queue drafts | `ingestAndQueueDrafts`, `ingestConversation` | `messaging ingest` |
+| Read / write draft files | `readDrafts`, `writeDrafts` | `messaging list`, `messaging approve`, `messaging edit`, `messaging reject` |
+| Follow-up nudge drafts | `createNudgeDrafts`, `shouldCreateNudge` | `messaging followups` |
+| Intent router / routed drafts | `KeywordIntentRouter`, `routeAndDraft` | hooks via `messaging ingest --hooks` |
+
+Local review UI: `review --port` (default **5290**).
+
+## Application automation
+
+Attended Easy Apply: one job URL, modal-scoped steps, resume upload, and explicit gates for 2FA, captcha, or external apply.
+
+| What you can do | API (`applications.*`) | CLI |
+|-----------------|------------------------|-----|
+| Run Easy Apply on a job URL | `easyApplyToJob` | — |
+
+Call `easyApplyToJob` from TypeScript with `live: true` after you connect a session. There is no CLI subcommand yet.
+
+## How the pipeline fits
+
+Outreach, comments, and messaging share the same **discover → grade → queue → approve → execute** rhythm. Discovery (`runRefill`) fills the invite queue. Grading and verify enrich or reject candidates. Operators approve proposals or drafts (CLI or `review` UI). Runners (`runInvites`, `runCommentExecutor`, `messaging send`) execute only after approval and respect dry-run, pacing, and cooldown state in `--state-dir`.
+
+Easy Apply is separate: a single attended flow per job with its own modal gates and no shared approval queue.
 
 ## Quick start
 
@@ -83,6 +188,7 @@ node --import tsx bin/linkedin-cdp.ts --state-dir ./state --cdp-url http://127.0
 
 | Area | Entry points |
 |------|----------------|
+| Lanes | `content`, `outreach`, `messaging`, `applications` |
 | Session | `LinkedInSession`, `checkAccountGuard`, `SessionLinkedInActions` |
 | Browser | `launchChrome`, `launchIsolatedChrome`, `waitForNetwork`, `checkCaptivePortal` |
 | Actions | `sendMessageLive`, `commentOnPostLive`, `sendConnectionInviteLive`, `verifySentInvites`, `searchPeople`, `probeConnectability`, `readFeed`, `easyApplyToJob` |

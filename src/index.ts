@@ -131,3 +131,14 @@ export * from './pipeline/messaging-plugins.js';
 export * from './pipeline/health.js';
 export * from './pipeline/alerts.js';
 export { asPipelineStore, type PipelineStore } from './pipeline/persist.js';
+
+export {
+  content,
+  outreach,
+  messaging,
+  applications,
+  type ContentLane,
+  type OutreachLane,
+  type MessagingLane,
+  type ApplicationsLane,
+} from './lanes.js';
