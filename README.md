@@ -50,7 +50,8 @@ node --import tsx bin/linkedin-cdp.ts --state-dir ./state --cdp-url http://127.0
 |--------|-------------|
 | `invites` | `status`, `run [--live]`, `resume --reason` |
 | `comments` | `capture`, `list`, `approve <id> --text`, `reject <id>`, `run [--live]` |
-| `messaging` | `ingest`, `list`, `approve`, `edit`, `reject`, `send [--live]` |
+| `messaging` | `ingest`, `list`, `approve`, `edit`, `reject`, `send`, `followups` (dry-run drafts only) |
+| `review` | local UI on `127.0.0.1` — `--port` (example default **5290**) |
 | `refill` | `--json` and/or `--csv`, optional `--strategy` |
 | `verify` | `[--live]` profile enrichment for research queue |
 | `contacts` | `import-csv <file>`, `list [--state]` |
@@ -58,12 +59,34 @@ node --import tsx bin/linkedin-cdp.ts --state-dir ./state --cdp-url http://127.0
 | `doctor` | health checks for all lanes |
 | `profile`, `inbox`, `connections`, `capture-query-ids` | read tooling (`--cdp-url`) |
 
+## Browser launcher (`src/browser/`)
+
+`waitForNetwork` probes TCP port **443** (configurable hosts). `checkCaptivePortal` hits Google’s `generate_204` with `redirect: manual`. `launchChrome` spawns a **headed** Chrome with an explicit `--user-data-dir` (refuses the default profile). `launchIsolatedChrome` is a `BrowserProvider` that optionally runs `waitForNetwork` before spawn.
+
+## People search & connectability
+
+`searchPeople` builds the Voyager people-search request and parses results, with DOM harvest fallback (`PEOPLE_SEARCH_HARVEST_EXPR`). `pickBestPeopleMatch` applies hint and **name-token** verification so sidebar cards cannot win. `probeConnectability` reports `connect | follow | pending | message | email_required | unavailable` without sending invites.
+
+## Content filter
+
+`contentRefusal` / `filterCommentContent` implement the full lookalike rules (NFC/NFKC, Latin folds, TLD tricks, IPv4, phones, hashtags, copy-span). Regression cases live in `fixtures/content-filter-cases.json`.
+
+## Adaptive cooldown
+
+`BayesianCooldownPolicy` ports episode-grid estimation from receipt-led limit observations. `FixedCooldownPolicy` stays the simple default; one verified success does **not** claim a full quota reset.
+
+## Feed & Easy Apply
+
+`readFeed`, `reactToPost`, `sharePost`, `listComments`, and `replyToComment` are DOM-first (`--live` for real clicks). `easyApplyToJob` scopes to the Easy Apply modal, advances only via stable aria-labels, uploads a fresh resume PDF, never clicks Save and exit / Dismiss, and surfaces 2FA/captcha/external apply as gates. Both default to dry-run unless `--live`.
+
 ## API overview
 
 | Area | Entry points |
 |------|----------------|
 | Session | `LinkedInSession`, `checkAccountGuard`, `SessionLinkedInActions` |
-| Actions | `sendMessageLive`, `commentOnPostLive`, `sendConnectionInviteLive`, `verifySentInvites` |
+| Browser | `launchChrome`, `launchIsolatedChrome`, `waitForNetwork`, `checkCaptivePortal` |
+| Actions | `sendMessageLive`, `commentOnPostLive`, `sendConnectionInviteLive`, `verifySentInvites`, `searchPeople`, `probeConnectability`, `readFeed`, `easyApplyToJob` |
+| Review UI | `startReviewServer`, `createNudgeDrafts` |
 | Pipeline | `runRefill`, `runVerify`, `ContactLedger`, `evaluateHealth`, `AlertDispatcher` |
 | Automation | `runInvites`, `captureAndDraft`, `dispatchOne`, `FileStore` |
 

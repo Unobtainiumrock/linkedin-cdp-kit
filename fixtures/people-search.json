@@ -1,0 +1,39 @@
+{
+  "hits": [
+    {
+      "slug": "jane-doe",
+      "name": "Jane Doe",
+      "headline": "Example engineer at Sample Co",
+      "degree": "2nd",
+      "profileUrl": "https://www.linkedin.com/in/jane-doe/"
+    },
+    {
+      "slug": "john-example",
+      "name": "John Example",
+      "headline": "Other headline",
+      "degree": "3rd",
+      "profileUrl": "https://www.linkedin.com/in/john-example/"
+    }
+  ],
+  "connectPrimary": {
+    "title": "Jane Doe",
+    "degree": "2nd",
+    "hasConnectPrimary": true,
+    "connectInMore": false,
+    "hasPending": false,
+    "hasMessage": false,
+    "hasFollow": false,
+    "emailGate": false
+  },
+  "connectPending": {
+    "title": "Jane Doe",
+    "degree": "2nd",
+    "hasConnectPrimary": false,
+    "hasPending": true
+  },
+  "wrongTitle": {
+    "title": "Sidebar Suggestion",
+    "degree": "2nd",
+    "hasConnectPrimary": true
+  }
+}

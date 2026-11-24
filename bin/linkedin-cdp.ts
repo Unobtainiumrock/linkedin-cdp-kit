@@ -24,6 +24,8 @@ import { evaluateHealth } from '../src/pipeline/health.js';
 import { loadStrategyFromJson } from '../src/pipeline/strategy.js';
 import { captureGraphqlQueryIds } from '../src/tools/capture-query-ids.js';
 import { scrapeConnections } from '../src/actions/scrape-connections.js';
+import { createNudgeDrafts } from '../src/automation/messaging/followup.js';
+import { startReviewServer } from '../src/ui/review-server.js';
 
 const argv = process.argv.slice(2);
 
@@ -289,7 +291,37 @@ async function main(): Promise<void> {
       }
       return;
     }
-    throw new Error('messaging: ingest | list | approve | reject | edit | send [--live]');
+    if (sub === 'followups') {
+      const file = flag('--threads');
+      const threads = file
+        ? (JSON.parse(readFileSync(file, 'utf8')) as Parameters<typeof createNudgeDrafts>[1])
+        : [];
+      console.log(
+        JSON.stringify(
+          createNudgeDrafts(stateDir, threads, {
+            daysAfterSend: Number(flag('--days') ?? '4'),
+            maxNudgesPerThread: Number(flag('--cap') ?? '2'),
+          }),
+          null,
+          2,
+        ),
+      );
+      return;
+    }
+    throw new Error('messaging: ingest | list | approve | reject | edit | send | followups [--live]');
+  }
+
+  if (domain === 'review') {
+    const port = Number(flag('--port') ?? '5290');
+    const server = await startReviewServer({ stateDir, port });
+    console.log(
+      JSON.stringify(
+        { host: server.host, port: server.port, csrfTokenFile: server.csrfTokenPath, url: `http://${server.host}:${server.port}/` },
+        null,
+        2,
+      ),
+    );
+    return;
   }
 
   if (domain === 'capture-query-ids') {

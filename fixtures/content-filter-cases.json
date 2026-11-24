@@ -1,0 +1,2204 @@
+[
+  {
+    "name": "control: plain link",
+    "text": "Latency matters more than recall here, see evil.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "control: fullwidth dot",
+    "text": "Latency matters more than recall here, see evil．com for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "control: math bold",
+    "text": "Latency matters more than recall here, see 𝐞𝐯𝐢𝐥.𝐜𝐨𝐦 for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "control: fullwidth at",
+    "text": "Latency matters, thanks ＠Jane for raising it.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "zero-width space before dot",
+    "text": "Latency matters more than recall here, see evil​.com for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "zero-width space inside tld",
+    "text": "Latency matters more than recall here, see evil.c​om for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "soft hyphen before dot",
+    "text": "Latency matters more than recall here, see evil­.com for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "word joiner in https",
+    "text": "Latency matters more than recall here, see ht⁠tps⁠://evil.example/x for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "ideographic full stop",
+    "text": "Latency matters more than recall here, see evil。com for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "halfwidth ideographic full stop",
+    "text": "Latency matters more than recall here, see evil｡com for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "one dot leader",
+    "text": "Latency matters more than recall here, see evil․com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "spaced dot",
+    "text": "Latency matters more than recall here, see evil . com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "bracketed dot",
+    "text": "Latency matters more than recall here, see evil[.]com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "spelled dot com",
+    "text": "Latency matters more than recall here, see evil dot com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link split across lines",
+    "text": "Latency matters more than recall here, see evil.\ncom for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "cyrillic host",
+    "text": "Latency matters more than recall here, see пример.com for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "cyrillic o in tld",
+    "text": "Latency matters more than recall here, see evil.cоm for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "cyrillic tld",
+    "text": "Latency matters more than recall here, see evil.сом for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "arabic-indic phone",
+    "text": "Latency matters. Call me on ٤١٥٥٥٥٠١٠٠ any time.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "phone with letter O",
+    "text": "Latency matters. Call me on 415 555 O1OO any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "hashtag after zero-width",
+    "text": "Latency matters more than recall here. #​vectorsearch",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "bidi override with zwsp",
+    "text": "Latency matters more than recall here, see ‮moc​.live for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "copy: verbatim 11 words",
+    "text": "Agreed, retrieval latency matters far more than recall for production agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: zero-width inside two words",
+    "text": "Agreed, retrieval lat​ency matters far more than recall for produc​tion agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "copy: cyrillic a in two words",
+    "text": "Agreed, retrieval latency matters far more than recаll for production аgents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "copy: accents on copied words",
+    "text": "Agreed, retrieval laténcy matters far more than récall for production agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: exactly 8 shared words",
+    "text": "one two three four five six seven eight",
+    "source": "x one two three four five six seven eight y",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: 7 shared words",
+    "text": "one two three four five six seven nine",
+    "source": "x one two three four five six seven eight y",
+    "expected": "pass"
+  },
+  {
+    "name": "copy: case and punctuation do not hide a copy",
+    "text": "RETRIEVAL, latency; matters far more than recall FOR production!",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: a word in another script in the source is skipped",
+    "text": "one two three four five six seven eight",
+    "source": "one two three four да five six seven eight",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: a character in another script inside a source word joins its halves",
+    "text": "one two three four five six seven eight",
+    "source": "one two three fourдfive six seven eight",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: 8 digits in 9 characters pass (the rule counts digits)",
+    "text": "Call 555 12345 now",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: 8-character run is fine",
+    "text": "Call 555 1234 now",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: slash separators",
+    "text": "Call me on 555/123/4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: international",
+    "text": "Call +1 415 555 0100 to talk.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: parentheses and dash",
+    "text": "Call (415) 555-0100.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: fullwidth digits",
+    "text": "Call ４１５ 555 0100 now.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "link: scheme",
+    "text": "See https://example.com for details.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: www with a digit host",
+    "text": "see www.123abc for it",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: short host",
+    "text": "Short link bit.ly/3xYz has it.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: dotted name",
+    "text": "We rebuilt it in Node.js last year.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: space before the dot",
+    "text": "Numbers at evil .com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: dot then space, lowercase tld",
+    "text": "Numbers at evil. com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: parenthesised dot word",
+    "text": "Numbers at evil (dot) com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: middle dot",
+    "text": "Numbers at evil·com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: hyphenation point",
+    "text": "Numbers at evil‧com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: dot operator",
+    "text": "Numbers at evil⋅com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: accented tld",
+    "text": "Numbers at evil.cóm today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: cedilla in the tld",
+    "text": "Numbers at evil.çom today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: decomposed accent in the tld",
+    "text": "Numbers at evil.cóm today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: no-break spaces around the dot",
+    "text": "Numbers at evil . com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "mention: at sign",
+    "text": "Thanks @Jane for this.",
+    "source": "",
+    "expected": "mention"
+  },
+  {
+    "name": "mention: email",
+    "text": "Write to jane@example.com.",
+    "source": "",
+    "expected": "mention"
+  },
+  {
+    "name": "hashtag",
+    "text": "Great point #agents.",
+    "source": "",
+    "expected": "hashtag"
+  },
+  {
+    "name": "hashtag: fullwidth number sign",
+    "text": "Great point ＃agents.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: fullwidth letters",
+    "text": "Ｆｕｌｌ width text.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: tab",
+    "text": "A tab\there.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: carriage return",
+    "text": "Line one\r\nline two.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: emoji with variation selector",
+    "text": "Love it ❤️ truly.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: emoji zwj sequence",
+    "text": "Team 👩‍💻 work.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: combining overlay",
+    "text": "Stri̶ke this.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: micro sign becomes Greek mu",
+    "text": "A 5 µs wait.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: spacing diaeresis becomes a combining mark",
+    "text": "Odd ¨ mark.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: byte order mark inside",
+    "text": "Text﻿ inside.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: private use",
+    "text": "Logo  here.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: lone surrogate",
+    "text": "Broken \ud800 text.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: Greek letter",
+    "text": "The α release.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: CJK",
+    "text": "Agreed 同意.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "character: regional indicator flag",
+    "text": "Go 🇺🇸 team.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "ok: plain",
+    "text": "Plain observation about ownership and retries.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: sentence before So",
+    "text": "Agreed. So the question is who owns the retry.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: paragraph starting with AI",
+    "text": "Latency matters.\nAI agents make it worse.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: vs. Us",
+    "text": "Them vs. Us is the wrong frame.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: capitalised word after a sentence",
+    "text": "Numbers at evil. Com is a word here.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: typographic punctuation",
+    "text": "A café owner’s view — “quotes”, an arrow → and 1,000 users in Q3 2025…",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: emoji without selectors",
+    "text": "Great point 🚀 and ✅ done.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: o’clock and a range",
+    "text": "It is 5 o’clock somewhere; 10 to 20 percent.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: accents",
+    "text": "Naïve résumé and Łódź.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: a decomposed accent composes",
+    "text": "Café talk.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: abbreviations and C#",
+    "text": "e.g. this, i.e. that, the U.S. team and C# code.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: seven shared words with the source",
+    "text": "Agents claim the same task and both, then fight about it.",
+    "source": "We let two agents claim the same task and both shipped it.",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: no-break space",
+    "text": "Ten percent.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: dental click as final l (U+01C0)",
+    "text": "Latency matters more than recall here, see eviǀ.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: l with stroke as final l (U+0142)",
+    "text": "Latency matters more than recall here, see evił.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: dotless i before dot (U+0131)",
+    "text": "Latency matters more than recall here, see wikı.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: o with stroke in tld (U+00F8)",
+    "text": "Latency matters more than recall here, see evil.cøm for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: c with hook in tld (U+0188)",
+    "text": "Latency matters more than recall here, see evil.ƈom for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: dental click in shortener tld",
+    "text": "Latency matters more than recall here, see bit.ǀy/3xYz for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: dotless i in tld (.ıo)",
+    "text": "Latency matters more than recall here, see evil.ıo for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: long s (NFKC to s)",
+    "text": "Latency matters more than recall here, see evil.ſh for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: combining acute in tld",
+    "text": "Latency matters more than recall here, see evil.cóm for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: bullet U+2022 as dot",
+    "text": "Latency matters more than recall here, see evil•com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: white bullet U+25E6 as dot",
+    "text": "Latency matters more than recall here, see evil◦com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: ring operator U+2218 as dot",
+    "text": "Latency matters more than recall here, see evil∘com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: two-dot leader U+2025",
+    "text": "Latency matters more than recall here, see evil‥com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: hyphenated dot",
+    "text": "Latency matters more than recall here, see evil-dot-com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: d0t with zero",
+    "text": "Latency matters more than recall here, see evil d0t com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: quoted dot",
+    "text": "Latency matters more than recall here, see evil 'dot' com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: spaced dot, uppercase TLD",
+    "text": "Latency matters more than recall here, see evil. COM for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: spaced dot, tld not in list",
+    "text": "Latency matters more than recall here, see evil . shop for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: line break inside tld (implementer)",
+    "text": "Latency matters more than recall here, see evil.c\nom for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: line break after one tld letter, shortener",
+    "text": "Latency matters more than recall here, see bit.l\ny/3xYz for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: punycode host",
+    "text": "Latency matters more than recall here, see xn--80ak6aa92e.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: punycode label alone",
+    "text": "Latency matters more than recall here, see xn--80ak6aa92e for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: ip address short",
+    "text": "Latency matters. Our dashboard is at 8.8.8.8 for anyone curious.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: ip address long",
+    "text": "Latency matters. Our dashboard is at 192.168.10.20 for anyone curious.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: ip with path",
+    "text": "Latency matters. Our dashboard is at 10.0.0.1/stats for anyone curious.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 security: shortener without dot",
+    "text": "Latency matters more than recall here, see lnkd in slash abc for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: markdown link",
+    "text": "Latency matters more than recall here, see [our numbers](evil) for more.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: mention without at",
+    "text": "Latency matters more than recall here, thanks Jane Doe for raising it.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: emoji plain",
+    "text": "Latency matters more than recall here 🚀",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: emoji ZWJ sequence",
+    "text": "Latency matters more than recall here 👩‍💻",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r4 security: emoji with VS16",
+    "text": "Latency matters more than recall here ❤️",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r4 security: keycap digit",
+    "text": "Latency matters more than recall here 4️⃣",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r4 security: skin tone modifier",
+    "text": "Latency matters more than recall here 👍🏽",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: phone with en dashes",
+    "text": "Latency matters. Call me on 415–555–0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 security: phone with U+2010 hyphens",
+    "text": "Latency matters. Call me on 415‐555‐0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 security: phone with commas",
+    "text": "Latency matters. Call me on 415,555,0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 security: phone (415) 555-0100 en dash",
+    "text": "Latency matters. Call me on (415) 555–0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 security: phone in dingbat digits",
+    "text": "Latency matters. Call me on ❹❶❺ ❺❺❺ O❶OO any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 security: phone in circled sans digits",
+    "text": "Latency matters. Call me on ➃➀➄ ➄➄➄ ➀➀➀➀ any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 security: phone spelled",
+    "text": "Latency matters. Call me on four one five five five five zero one zero zero.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: phone with letter O",
+    "text": "Latency matters. Call me on 415 555 O1OO any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 security: superscript digits phone",
+    "text": "Latency matters. Call me on ⁴¹⁵ ⁵⁵⁵ ⁰¹⁰⁰ any time.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r4 security: music sharp hashtag",
+    "text": "Latency matters more than recall here. ♯vectorsearch",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 security: round-2: hashtag after zero-width",
+    "text": "Latency matters more than recall here. #​vectorsearch",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r4 correctness 01: call 555–123–4567\"",
+    "text": "call 555–123–4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 02: call 555‐123‐4567\"",
+    "text": "call 555‐123‐4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 03: call 555‑123‑4567\"",
+    "text": "call 555‑123‑4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 04: call 555−123−4567\"",
+    "text": "call 555−123−4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 05: call 555‒123‒4567\"",
+    "text": "call 555‒123‒4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 06: call 555,123,4567\"",
+    "text": "call 555,123,4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 07: call 555_123_4567\"",
+    "text": "call 555_123_4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 08: call 555 x 123 x 4567\"",
+    "text": "call 555 x 123 x 4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 09: call 555*123*4567\"",
+    "text": "call 555*123*4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 10: call 555-1234\"",
+    "text": "call 555-1234",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 11: call 555-123-4567\"",
+    "text": "call 555-123-4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 12: visit evil•com\"",
+    "text": "visit evil•com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 13: visit evil●com\"",
+    "text": "visit evil●com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 14: visit evil․com\"",
+    "text": "visit evil․com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 15: visit evil·com\"",
+    "text": "visit evil·com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 16: visit evil∙com\"",
+    "text": "visit evil∙com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 17: visit evil dot c o m\"",
+    "text": "visit evil dot c o m",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 18: visit evil-dot-com\"",
+    "text": "visit evil-dot-com",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 19: evil . co . uk\"",
+    "text": "evil . co . uk",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 20: visit evil.club now\"",
+    "text": "visit evil.club now",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 21: visit evil dot club\"",
+    "text": "visit evil dot club",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 22: name at gmail dot com\"",
+    "text": "name at gmail dot com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 23: hxxp://evil[.]com\"",
+    "text": "hxxp://evil[.]com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 24: evil(dot)com\"",
+    "text": "evil(dot)com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 25: evil DOT com\"",
+    "text": "evil DOT com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 26: ♯tag here\"",
+    "text": "♯tag here",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 27: about ¹²³⁴ people\"",
+    "text": "about ¹²³⁴ people",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r4 correctness 28: superscripts 5²5²123²45²67\"",
+    "text": "superscripts 5²5²123²45²67",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 correctness 29: It works. so we shipped\"",
+    "text": "It works. so we shipped",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 30: Built in the US. me too\"",
+    "text": "Built in the US. me too",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 correctness 31: A normal comment about ownership and res",
+    "text": "A normal comment about ownership and responsibility, with a dash — and quotes “fine”.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 32: Café owners know this\"",
+    "text": "Café owners know this",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 33: Café owners know this\"",
+    "text": "Café owners know this",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 34: naïve take\"",
+    "text": "naïve take",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 correctness 35: ❤️ love it\"",
+    "text": "❤️ love it",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r4 correctness 36: 🚀 launch\"",
+    "text": "🚀 launch",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b1",
+    "text": "Retrieval latency matters more than recall once agents run in production. We saw p95 drop from 900 ms to 240 ms when we cached embeddings per tenant.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b2",
+    "text": "Agreed on the eval point. Most teams I talk to measure accuracy on a fixed set and never re-sample after launch.\n\nThe drift shows up in week three, not week one.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b3",
+    "text": "This matches what we see: the hard part is not the model, it's the handoff between steps. A 2% error per step compounds fast over 10 steps.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b4",
+    "text": "Strong take. I'd add one thing: cost per resolved ticket is a better north star than cost per token.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b5",
+    "text": "We moved from 3 vendors to 1 in Q3 and the integration work dropped by roughly half.\n\nCurious whether you saw the same after the switch?",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b6",
+    "text": "The 2024–2025 budget cycle is when most of these pilots either scale or die.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b7",
+    "text": "e.g. a team of 5 can ship this in 2 weeks if the data is clean; i.e. most of the work is upstream.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b8",
+    "text": "Fair point… though I think the bottleneck moves to review, not generation.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b9",
+    "text": "• Faster onboarding\n• Fewer handoffs\n• Clearer ownership\nThat third one is the one people skip.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b10",
+    "text": "We hit $1.2M ARR with 14 people, so I'm wary of the 'hire ahead of revenue' advice here.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b11",
+    "text": "Version 2.0\nwas the turning point for us, mostly because of the new scheduler.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b12",
+    "text": "Café owners and naïve pricing models have more in common than you'd think — both underestimate the tail.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b13",
+    "text": "Our latency went from 1–2 s to under 300 ms after we moved the index closer to the workers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r4 benign b14",
+    "text": "Between 9 and 5, mostly. After hours it is a different story.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "copy: dotless i in two words",
+    "text": "Agreed, retrıeval latency matters far more than recall for productıon agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: l with stroke and o with stroke",
+    "text": "Agreed, retrieval łatency matters far more than recall før production agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "phone: 9 digits with a dash",
+    "text": "Call 555-123-456 now.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: 8 digits with a dash pass",
+    "text": "Call 5555-1234 now.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: a year range passes",
+    "text": "The 2019-2024 plan and the 2024–2025 budget.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: a doubled dash collapses, so the run joins",
+    "text": "Codes 1234 -- 56789 here.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: a letter other than o or x breaks the run",
+    "text": "From 12345 to 67890 overall.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: a bullet list whose items start with TLD words",
+    "text": "• AI agents\n• Me too\n• So far so good",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "link: a bullet inside a host",
+    "text": "Numbers at evil•com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: a line break inside a shortener host",
+    "text": "Numbers at bit.l\ny/3xYz today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "ok: a line break after a sentence",
+    "text": "It matters.\nSecond point here.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "link: a TLD letter outside the fold table (thorn)",
+    "text": "Numbers at evil.cþm today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "phone: a letter in a short gap breaks the run",
+    "text": "Codes 12345a6789 here.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: o and x in short gaps join the run",
+    "text": "Codes 12345o6789 and 1234x56789 here.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "copy: source with plain source",
+    "text": "Buy cheap followers now from our partner because growth matters, I agree.",
+    "source": "Buy cheap followers now from our partner because growth matters and reach is everything",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: source with zero-width spaces between words",
+    "text": "Buy cheap followers now from our partner because growth matters, I agree.",
+    "source": "Buy​ cheap​ followers​ now​ from​ our​ partner​ because​ growth​ matters​ and​ reach​ is​ everything",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: source with zero-width joiners inside words",
+    "text": "Buy cheap followers now from our partner because growth matters, I agree.",
+    "source": "Buy cheap fo‍llo‍wers no‍w fro‍m o‍ur partner because gro‍wth matters and reach is everything",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: source with emoji with VS16 between words",
+    "text": "Buy cheap followers now from our partner because growth matters, I agree.",
+    "source": "Buy ❤️ cheap ❤️ followers ❤️ now ❤️ from ❤️ our ❤️ partner ❤️ because ❤️ growth ❤️ matters ❤️ and ❤️ reach ❤️ is ❤️ everything",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: source with soft hyphens inside words",
+    "text": "Buy cheap followers now from our partner because growth matters, I agree.",
+    "source": "Buy che­ap followe­rs now from our partne­r be­cause­ growth matte­rs and re­ach is e­ve­rything",
+    "expected": "copied_span"
+  },
+  {
+    "name": "r4 test critic: Call 555–123–4567 any time.\"",
+    "text": "Call 555–123–4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 test critic: Call 555‐123‐4567 any time.\"",
+    "text": "Call 555‐123‐4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 test critic: Call 555−123−4567 any time.\"",
+    "text": "Call 555−123−4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 test critic: Call 555,123,4567 any time.\"",
+    "text": "Call 555,123,4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 test critic: Call 555 123 4567 any time.\"",
+    "text": "Call 555 123 4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 test critic: Call 555_123_4567 any time.\"",
+    "text": "Call 555_123_4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 test critic: Call 555·123·4567 any time.\"",
+    "text": "Call 555·123·4567 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r4 test critic: See evil•com today.\"",
+    "text": "See evil•com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 test critic: See evil “dot” com today.\"",
+    "text": "See evil “dot” com today.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 test critic: See evil․com today.\"",
+    "text": "See evil․com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 test critic: Visit evil .tv today.\"",
+    "text": "Visit evil .tv today.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 test critic: the dot com crash taught us\"",
+    "text": "the dot com crash taught us",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 test critic: It works. so what\"",
+    "text": "It works. so what",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r4 test critic: Dates like 20/10/2025 matter.\"",
+    "text": "Dates like 20/10/2025 matter.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 test critic: Ping 1-800-FLOWERS\"",
+    "text": "Ping 1-800-FLOWERS",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r4 test critic: Text me on WhatsApp: five five five one two ",
+    "text": "Text me on WhatsApp: five five five one two three four",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: en dash separators",
+    "text": "Call 415–555–0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: U+2010 hyphen separators",
+    "text": "Call 415‐555‐0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: U+2212 minus separators",
+    "text": "Call 415−555−0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: comma separators",
+    "text": "Call 415,555,0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: underscore separators",
+    "text": "Call 415_555_0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "link: uppercase Visit EVIL.COM today.\"",
+    "text": "Visit EVIL.COM today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: uppercase See HTTPS://123 for it.\"",
+    "text": "See HTTPS://123 for it.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: uppercase See WWW.123ABC for it.\"",
+    "text": "See WWW.123ABC for it.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: uppercase Numbers at EVIL . COM today.\"",
+    "text": "Numbers at EVIL . COM today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: uppercase Numbers at EVIL[.]COM today.\"",
+    "text": "Numbers at EVIL[.]COM today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: uppercase Numbers at EVIL DOT COM today",
+    "text": "Numbers at EVIL DOT COM today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .com",
+    "text": "Numbers at x . com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .com",
+    "text": "Numbers at x dot com today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .net",
+    "text": "Numbers at x . net today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .net",
+    "text": "Numbers at x dot net today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .org",
+    "text": "Numbers at x . org today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .org",
+    "text": "Numbers at x dot org today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .io",
+    "text": "Numbers at x . io today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .io",
+    "text": "Numbers at x dot io today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .ai",
+    "text": "Numbers at x . ai today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .ai",
+    "text": "Numbers at x dot ai today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .app",
+    "text": "Numbers at x . app today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .app",
+    "text": "Numbers at x dot app today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .dev",
+    "text": "Numbers at x . dev today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .dev",
+    "text": "Numbers at x dot dev today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .xyz",
+    "text": "Numbers at x . xyz today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .xyz",
+    "text": "Numbers at x dot xyz today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .me",
+    "text": "Numbers at x . me today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .me",
+    "text": "Numbers at x dot me today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .ly",
+    "text": "Numbers at x . ly today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .ly",
+    "text": "Numbers at x dot ly today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .co",
+    "text": "Numbers at x . co today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .co",
+    "text": "Numbers at x dot co today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .us",
+    "text": "Numbers at x . us today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .us",
+    "text": "Numbers at x dot us today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .info",
+    "text": "Numbers at x . info today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .info",
+    "text": "Numbers at x dot info today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .biz",
+    "text": "Numbers at x . biz today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .biz",
+    "text": "Numbers at x dot biz today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .gg",
+    "text": "Numbers at x . gg today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .gg",
+    "text": "Numbers at x dot gg today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .so",
+    "text": "Numbers at x . so today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .so",
+    "text": "Numbers at x dot so today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spaced dot before .sh",
+    "text": "Numbers at x . sh today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: spelled dot before .sh",
+    "text": "Numbers at x dot sh today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 correctness 01: call 555–123–4567\"",
+    "text": "call 555–123–4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 02: call 555‐123‐4567\"",
+    "text": "call 555‐123‐4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 03: call 555‑123‑4567\"",
+    "text": "call 555‑123‑4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 04: call 555−123−4567\"",
+    "text": "call 555−123−4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 05: call 555‒123‒4567\"",
+    "text": "call 555‒123‒4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 06: call 555,123,4567\"",
+    "text": "call 555,123,4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 07: call 555_123_4567\"",
+    "text": "call 555_123_4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 08: call 555 x 123 x 4567\"",
+    "text": "call 555 x 123 x 4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 09: call 555*123*4567\"",
+    "text": "call 555*123*4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 10: call 555-123-4567\"",
+    "text": "call 555-123-4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 11: call 555 – 123 – 4567\"",
+    "text": "call 555 – 123 – 4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 12: visit evil•com\"",
+    "text": "visit evil•com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 correctness 13: visit evil●com\"",
+    "text": "visit evil●com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 correctness 14: visit evil • com\"",
+    "text": "visit evil • com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 correctness 15: visit evil․com\"",
+    "text": "visit evil․com",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 correctness 16: call ➀➀➀➁➂➃➄➅➆➇\"",
+    "text": "call ➀➀➀➁➂➃➄➅➆➇",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 17: call 555:123:4567\"",
+    "text": "call 555:123:4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 18: call 555~123~4567\"",
+    "text": "call 555~123~4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 19: call 555|123|4567\"",
+    "text": "call 555|123|4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 20: call 555+123+4567\"",
+    "text": "call 555+123+4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 21: call 555=123=4567\"",
+    "text": "call 555=123=4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 22: call 555X123X4567\"",
+    "text": "call 555X123X4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 23: call 555 ; 123 ; 4567\"",
+    "text": "call 555 ; 123 ; 4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 24: call 555⁄123⁄4567\"",
+    "text": "call 555⁄123⁄4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 25: call 555∕123∕4567\"",
+    "text": "call 555∕123∕4567",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 26: • first point\\n• second point\"",
+    "text": "• first point\n• second point",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 correctness 27: Three things:\\n  • speed\\n  • cost\"",
+    "text": "Three things:\n  • speed\n  • cost",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 correctness 28: Between 2019–2024 we grew\"",
+    "text": "Between 2019–2024 we grew",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 correctness 29: From 2024-2025 on\"",
+    "text": "From 2024-2025 on",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 correctness 30: 1,000,000,000 users\"",
+    "text": "1,000,000,000 users",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 correctness 31: We serve 12 teams across 3 regions with ",
+    "text": "We serve 12 teams across 3 regions with 45 people",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 correctness 32: A normal comment about ownership, with a",
+    "text": "A normal comment about ownership, with a dash — and quotes “fine”.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: fraction slash U+2044 separators",
+    "text": "Call 415⁄555⁄0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: division slash U+2215 separators",
+    "text": "Call 415∕555∕0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: colon separators",
+    "text": "Call 415:555:0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: vertical bar separators",
+    "text": "Call 415|555|0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: tilde separators",
+    "text": "Call 415~555~0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: plus separators",
+    "text": "Call 415+555+0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: equals separators",
+    "text": "Call 415=555=0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: spaced semicolon separators",
+    "text": "Call 415 ; 555 ; 0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: capital X separators",
+    "text": "Call 415X555X0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: line break separators",
+    "text": "Call 415\n555\n0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: a run of 4 non-letters breaks it",
+    "text": "Codes 1234 ;;;; 56789 here.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "link: a line break inside a TLD after a space",
+    "text": "See evil.c \nom today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: a line break inside a TLD before a space",
+    "text": "See evil.c\n om today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: two line breaks inside a TLD",
+    "text": "See evil.c\n\nom today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "link: a line break after two TLD letters",
+    "text": "See evil.co\nm today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "phone: a gap of exactly 4 characters breaks the run",
+    "text": "Codes 1234;;;;56789 here.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "phone: a gap of exactly 3 characters joins the run",
+    "text": "Codes 1234;;;56789 here.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "phone: a spaced gap of exactly 4 characters breaks the run",
+    "text": "Codes 1234 ;; 56789 here.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok: a year range then a colon and words",
+    "text": "Between 2019–2024: we grew.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: phone: 4-space gaps",
+    "text": "Latency matters. Call me on 415    555    0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: double-dash gaps",
+    "text": "Latency matters. Call me on 415 -- 555 -- 0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: pipe separators",
+    "text": "Latency matters. Call me on 415|555|0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: colon separators",
+    "text": "Latency matters. Call me on 415:555:0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: tilde separators",
+    "text": "Latency matters. Call me on 415~555~0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: backslash separators",
+    "text": "Latency matters. Call me on 415\\555\\0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: l for 1",
+    "text": "Latency matters. Call me on 4l5 555 0l00 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: I for 1",
+    "text": "Latency matters. Call me on 4I5 555 0I00 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: S for 5",
+    "text": "Latency matters. Call me on 41S S5S 0100 any time.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: phone: 7-digit local (by design)",
+    "text": "Latency matters. Call me on 555-0100 any time.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: phone: 8 digits",
+    "text": "Latency matters. Call me on 5555 0100 any time.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: phone: plus and spaces",
+    "text": "Latency matters. Call me on +1 415 555 0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: phone: words between groups",
+    "text": "Latency matters. Call me on 415 then 555 then 0100 any time.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: phone: fraction slash",
+    "text": "Latency matters. Call me on 415⁄555⁄0100 any time.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 security: link: zero for o in tld",
+    "text": "Latency matters more than recall here, see evil.c0m for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 security: link: one for l in tld",
+    "text": "Latency matters more than recall here, see bit.1y/3xYz for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 security: link: multiplication sign before dot",
+    "text": "Latency matters more than recall here, see bo×.com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: degree sign as dot",
+    "text": "Latency matters more than recall here, see evil°com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: medium black circle as dot",
+    "text": "Latency matters more than recall here, see evil⚫com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: white circle as dot",
+    "text": "Latency matters more than recall here, see evil○com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: two-dot leader",
+    "text": "Latency matters more than recall here, see evil‥com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: bullet at line start then tld",
+    "text": "Latency matters more than recall here, see evil\n•com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: hyphenated dot",
+    "text": "Latency matters more than recall here, see evil-dot-com for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: spaced dot, unlisted tld",
+    "text": "Latency matters more than recall here, see evil . shop for numbers.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: wynn for p in https",
+    "text": "Latency matters more than recall here, see httƿs only.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: link: schwa host",
+    "text": "Latency matters more than recall here, see əvil.com for numbers.",
+    "source": "",
+    "expected": "unsupported_character"
+  },
+  {
+    "name": "r5 security: link: thorn host",
+    "text": "Latency matters more than recall here, see þvil.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 security: link: eszett host",
+    "text": "Latency matters more than recall here, see claß.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 security: link: line break after dot then tld",
+    "text": "Latency matters more than recall here, see evil.\ncom for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 security: link: line break before dot",
+    "text": "Latency matters more than recall here, see evil\n.com for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 security: link: two line breaks inside tld",
+    "text": "Latency matters more than recall here, see evil.c\n\nom for numbers.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 security: fp: version line",
+    "text": "Version 2.0\nwas the turning point for us.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: fp: 1.5x faster",
+    "text": "It ran 1.5x faster after the change.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: fp: Ph.D",
+    "text": "Most Ph.D\nstudents I know would agree.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: fp: year list",
+    "text": "We ran pilots in 2023, 2024 and 2025.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: fp: year range en dash",
+    "text": "The 2024–2025 budget cycle decides most pilots.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: fp: big number",
+    "text": "We crossed 1,000,000 requests a day in March.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: fp: date",
+    "text": "The meetup is on 2026-11-20 at 18:00.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "r5 security: fp: bullet list",
+    "text": "• Faster onboarding\n• Fewer handoffs",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "copy: source words separated by four-per-em spaces",
+    "text": "Agreed, retrieval latency matters far more than recall for production agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: source words separated by ideographic spaces",
+    "text": "Agreed, retrieval latency matters far more than recall for production agents today.",
+    "source": "Our　team　learned　that　retrieval　latency　matters　far　more　than　recall　for　production　agents　today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: source words separated by thin spaces",
+    "text": "Agreed, retrieval latency matters far more than recall for production agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "copy: source words separated by narrow no-break spaces",
+    "text": "Agreed, retrieval latency matters far more than recall for production agents today.",
+    "source": "Our team learned that retrieval latency matters far more than recall for production agents today.",
+    "expected": "copied_span"
+  },
+  {
+    "name": "r5 low: Our dashboard is at 10.0.0.1/stats for anyon",
+    "text": "Our dashboard is at 10.0.0.1/stats for anyone.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 low: Ping 8.8.8.8 to check.\"",
+    "text": "Ping 8.8.8.8 to check.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 low: Numbers at evil.c0m today.\"",
+    "text": "Numbers at evil.c0m today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 low: Short link bit.1y/3xYz here.\"",
+    "text": "Short link bit.1y/3xYz here.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 low: Numbers at evil.a1 today.\"",
+    "text": "Numbers at evil.a1 today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 low: Numbers at evil.d3v today.\"",
+    "text": "Numbers at evil.d3v today.",
+    "source": "",
+    "expected": "link"
+  },
+  {
+    "name": "r5 low: Call 415    555    0100 now.\"",
+    "text": "Call 415    555    0100 now.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 low: Call 415 -- 555 -- 0100 now.\"",
+    "text": "Call 415 -- 555 -- 0100 now.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 low: Call 4l5 555 0l00 now.\"",
+    "text": "Call 4l5 555 0l00 now.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "r5 low: Call 4I5 555 0I00 now.\"",
+    "text": "Call 4I5 555 0I00 now.",
+    "source": "",
+    "expected": "contact_digits"
+  },
+  {
+    "name": "ok r5: Release 1.10 is out.\"",
+    "text": "Release 1.10 is out.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r5: It took 1.5h to run.\"",
+    "text": "It took 1.5h to run.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r5: v2.1a shipped today.\"",
+    "text": "v2.1a shipped today.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r5: Version 1.2.3 is stable.\"",
+    "text": "Version 1.2.3 is stable.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r5: Most Ph.D\\nstudents would agree.\"",
+    "text": "Most Ph.D\nstudents would agree.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r5: I think 555 is fine.\"",
+    "text": "I think 555 is fine.",
+    "source": "",
+    "expected": "pass"
+  },
+  {
+    "name": "ok r5: We crossed 1,000,000 requests.\"",
+    "text": "We crossed 1,000,000 requests.",
+    "source": "",
+    "expected": "pass"
+  }
+]

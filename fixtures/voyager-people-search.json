@@ -1,0 +1,10 @@
+{
+  "included": [
+    {
+      "$type": "com.linkedin.voyager.dash.search.EntityResultViewModel",
+      "navigationContext": { "actionTarget": "https://www.linkedin.com/in/jane-doe" },
+      "title": { "text": "Jane Doe" },
+      "primarySubtitle": { "text": "Example engineer at Sample Co" }
+    }
+  ]
+}

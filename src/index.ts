@@ -9,6 +9,9 @@ export {
   rewriteWsUrl,
 } from './cdp/discovery.js';
 export { attachToCdpUrl, AttachToCdpUrlProvider, type BrowserProvider, type BrowserLease } from './cdp/browser-provider.js';
+export { waitForNetwork, checkCaptivePortal, DEFAULT_NETWORK_HOSTS } from './browser/network.js';
+export { launchChrome, type LaunchedChrome } from './browser/launch.js';
+export { launchIsolatedChrome, LaunchIsolatedChromeProvider } from './browser/provider.js';
 
 export { LinkedInSession, type LinkedInSessionConnectOptions, type MeIdentity } from './session.js';
 export { checkAccountGuard, type ExpectedAccount, type AccountGuardResult } from './session/account-guard.js';
@@ -73,6 +76,25 @@ export {
   type PullThreadOptions,
 } from './actions/scrape-thread.js';
 export { LinkedInMessageListener, type InboundMessage } from './actions/listen.js';
+export {
+  searchPeople,
+  buildVoyagerPeopleSearch,
+  pickBestPeopleMatch,
+  PEOPLE_SEARCH_HARVEST_EXPR,
+  type PeopleSearchHit,
+  type PeopleSearchResult,
+} from './actions/people-search.js';
+export { probeConnectability, classifyConnectabilityProbe, CONNECTABILITY_PROBE_EXPR, type ConnectabilityResult } from './actions/connectability.js';
+export { verifyNameTokens } from './actions/connectability-tokens.js';
+export {
+  readFeed,
+  reactToPost,
+  sharePost,
+  listComments,
+  replyToComment,
+  type FeedPost,
+} from './actions/feed.js';
+export { easyApplyToJob, EASY_APPLY_SELECTORS, type EasyApplyResult } from './actions/easy-apply.js';
 
 export { captureGraphqlQueryIds, extractQueryIdFromUrl, type CapturedQueryId } from './tools/capture-query-ids.js';
 
@@ -83,7 +105,13 @@ export * from './automation/core/types.js';
 export { FileStore, InMemoryStore, type Store } from './automation/core/store.js';
 export { evaluateGates, resumeFromReview, enterReviewHold, enterCooldown } from './automation/core/gates.js';
 export { runInvites, inviteStatus, resumeInvites } from './automation/invites/runner.js';
-export { filterCommentContent, BENIGN_COMMENT_SAMPLE } from './automation/comments/content-filter.js';
+export {
+  filterCommentContent,
+  contentRefusal,
+  BENIGN_COMMENT_SAMPLE,
+  BENIGN_COUNTER_CASES,
+  type ContentFilterCase,
+} from './automation/comments/content-filter.js';
 export { captureAndDraft, runCommentExecutor, approveProposal, type CaptureAndDraftOptions } from './automation/comments/pipeline.js';
 export { dispatchOne } from './automation/messaging/dispatch.js';
 export { inboundFingerprint, ingestConversation, ingestAndQueueDrafts, type IngestQueueResult } from './automation/messaging/ingest.js';
@@ -96,6 +124,8 @@ export * from './pipeline/verify.js';
 export * from './pipeline/contacts.js';
 export * from './pipeline/audit.js';
 export * from './pipeline/cooldown.js';
+export { createNudgeDrafts, shouldCreateNudge, DEFAULT_FOLLOWUP_CONFIG } from './automation/messaging/followup.js';
+export { startReviewServer, readOrCreateCsrfToken } from './ui/review-server.js';
 export * from './pipeline/comments-plugins.js';
 export * from './pipeline/messaging-plugins.js';
 export * from './pipeline/health.js';
