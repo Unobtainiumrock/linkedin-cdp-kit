@@ -8,6 +8,8 @@ export type PeopleSearchHit = {
   headline: string;
   degree: string;
   profileUrl: string;
+  /** Set when the anchor sits in a sidebar. Those cards cannot satisfy the name check. */
+  sidebar?: boolean;
 };
 
 export type PeopleSearchOptions = {
@@ -54,8 +56,9 @@ export const PEOPLE_SEARCH_HARVEST_EXPR = `(() => {
     const sub = lines.filter(l => l !== nameRaw && !noise.test(l) && l.length > 1)
       .find(l => !/^View .*profile$/i.test(l)) || '';
     const deg = (lines.find(l => /(1st|2nd|3rd\\+?)/.test(l)) || '').match(/(1st|2nd|3rd\\+?)/);
+    const sidebar = !!(a.closest && a.closest('aside, [role="complementary"], .scaffold-layout__aside'));
     seen[slug] = 1;
-    out.push({ slug, name, headline: sub, degree: deg ? deg[1] : '', profileUrl: 'https://www.linkedin.com/in/' + slug + '/' });
+    out.push({ slug, name, headline: sub, degree: deg ? deg[1] : '', profileUrl: 'https://www.linkedin.com/in/' + slug + '/', sidebar: sidebar });
   });
   return { count: out.length, people: out };
 })()`;
@@ -64,16 +67,21 @@ export function pickBestPeopleMatch(
   hits: PeopleSearchHit[],
   opts: { expectedName?: string; hint?: string },
 ): PeopleSearchHit | null {
+  const eligible = hits.filter((h) => h.sidebar !== true);
   const named = opts.expectedName
-    ? hits.filter((h) => verifyNameTokens(opts.expectedName ?? '', h.name))
-    : hits;
-  const pool = named.length > 0 ? named : hits;
+    ? eligible.filter((h) => verifyNameTokens(opts.expectedName ?? '', h.name))
+    : eligible;
+  if (opts.expectedName && named.length === 0) return null;
   if (opts.hint) {
-    const re = new RegExp(opts.hint.replace(/\|/g, '|'), 'i');
-    const hinted = pool.find((h) => re.test(h.headline));
-    if (hinted) return hinted;
+    let re: RegExp;
+    try {
+      re = new RegExp(opts.hint, 'i');
+    } catch {
+      return null;
+    }
+    return named.find((h) => re.test(h.headline)) ?? null;
   }
-  return pool[0] ?? null;
+  return named[0] ?? null;
 }
 
 function hitsFromVoyager(raw: unknown): PeopleSearchHit[] {
@@ -119,20 +127,22 @@ function hitsFromDom(value: unknown): PeopleSearchHit[] {
   if (!value || typeof value !== 'object') return [];
   const people = (value as { people?: unknown[] }).people;
   if (!Array.isArray(people)) return [];
-  return people
-    .map((p) => {
-      if (!p || typeof p !== 'object') return null;
-      const row = p as Partial<PeopleSearchHit & { sub?: string }>;
-      if (typeof row.slug !== 'string') return null;
-      return {
-        slug: row.slug,
-        name: typeof row.name === 'string' ? row.name : '',
-        headline: typeof row.headline === 'string' ? row.headline : typeof row.sub === 'string' ? row.sub : '',
-        degree: typeof row.degree === 'string' ? row.degree : '',
-        profileUrl: typeof row.profileUrl === 'string' ? row.profileUrl : `https://www.linkedin.com/in/${row.slug}/`,
-      };
-    })
-    .filter((x): x is PeopleSearchHit => x !== null);
+  const hits: PeopleSearchHit[] = [];
+  for (const person of people) {
+    if (!person || typeof person !== 'object') continue;
+    const row = person as Partial<PeopleSearchHit & { sub?: string }>;
+    if (typeof row.slug !== 'string') continue;
+    const hit: PeopleSearchHit = {
+      slug: row.slug,
+      name: typeof row.name === 'string' ? row.name : '',
+      headline: typeof row.headline === 'string' ? row.headline : typeof row.sub === 'string' ? row.sub : '',
+      degree: typeof row.degree === 'string' ? row.degree : '',
+      profileUrl: typeof row.profileUrl === 'string' ? row.profileUrl : `https://www.linkedin.com/in/${row.slug}/`,
+    };
+    if (row.sidebar === true) hit.sidebar = true;
+    hits.push(hit);
+  }
+  return hits;
 }
 
 export type PeopleSearchResult =

@@ -16,9 +16,16 @@ describe('browser network', () => {
     assert.deepEqual(r.hosts, ['example.com']);
   });
 
-  it('checkCaptivePortal accepts 204', async () => {
-    const r = await checkCaptivePortal(async () => ({ status: 204, headers: { get: () => null } } as Response));
+  it('checkCaptivePortal accepts 204 and does not follow redirects', async () => {
+    const calls: Array<{ url: string; redirect?: RequestRedirect }> = [];
+    const r = await checkCaptivePortal(async (url, init) => {
+      calls.push({ url: String(url), redirect: init?.redirect });
+      return { status: 204, headers: { get: () => null } } as Response;
+    });
     assert.equal(r.status, 'ok');
+    assert.equal(calls[0]?.redirect, 'manual');
+    assert.match(calls[0]?.url ?? '', /generate_204/);
+    assert.equal(calls[0]?.url.includes('linkedin.com'), false);
   });
 
   it('checkCaptivePortal rejects redirect', async () => {
@@ -46,19 +53,41 @@ describe('launchChrome', () => {
     chmodSync(fake, 0o755);
     const userDataDir = join(dir, 'profile');
     const calls: string[][] = [];
+    const killed: string[] = [];
     const launched = launchChrome({
       userDataDir,
-      port: 9222,
+      port: 18765,
       executable: fake,
       spawnFn: ((exe, args) => {
         calls.push([exe, ...(args as string[])]);
-        return { pid: 424242, stdout: { on: () => {} }, stderr: { on: () => {} } };
+        return {
+          pid: 424242,
+          kill: (signal?: NodeJS.Signals | number) => {
+            killed.push(String(signal ?? ''));
+            return true;
+          },
+          stdout: { on: () => {} },
+          stderr: { on: () => {} },
+        };
       }) as typeof import('node:child_process').spawn,
     });
-    assert.equal(launched.port, 9222);
-    assert.equal(launched.cdpUrl, 'http://127.0.0.1:9222');
+    assert.equal(launched.port, 18765);
+    assert.equal(launched.cdpUrl, 'http://127.0.0.1:18765');
     assert.ok(calls[0]?.some((a) => a.includes('--user-data-dir=')));
-    launched.stop();
+    assert.ok(calls[0]?.includes('--remote-debugging-address=127.0.0.1'));
+    const originalKill = process.kill;
+    let foreignSignals = 0;
+    process.kill = (() => {
+      foreignSignals += 1;
+      return true;
+    }) as typeof process.kill;
+    try {
+      launched.stop();
+    } finally {
+      process.kill = originalKill;
+    }
+    assert.deepEqual(killed, ['SIGTERM']);
+    assert.equal(foreignSignals, 0);
     rmSync(dir, { recursive: true, force: true });
   });
 });
@@ -68,10 +97,10 @@ describe('launchIsolatedChrome', () => {
     let net = 0;
     const provider = launchIsolatedChrome({
       userDataDir: mkdtempSync(join(tmpdir(), 'lcdp-prof-')),
-      port: 9222,
+      port: 18765,
       executable: '/bin/true',
       networkCheck: { connect: async () => { net++; } },
-      spawnFn: (() => ({ pid: 1, stdout: { on: () => {} }, stderr: { on: () => {} } })) as typeof import('node:child_process').spawn,
+      spawnFn: (() => ({ pid: 4242, kill: () => true, stdout: { on: () => {} }, stderr: { on: () => {} } })) as typeof import('node:child_process').spawn,
     });
     await assert.rejects(() => provider.acquire(), /LinkedIn tab|ECONNREFUSED|fetch|chrome/);
     assert.ok(net >= 1);

@@ -26,6 +26,22 @@ describe('BayesianCooldownPolicy', () => {
     assert.ok(next !== null && next > Date.parse('2026-01-02T00:00:00.000Z'));
   });
 
+  it('disagreeing observations fall back instead of unlocking', () => {
+    const at = '2026-01-01T00:00:00.000Z';
+    const obs: RateLimitObservation[] = [
+      { firstLimitAt: at },
+      { evidenceQuality: 'receipt', receipt: 'r1', successfulAt: at },
+    ];
+    const model = computeBayesianPosterior(obs);
+    assert.equal(model.scheduleStatus, 'fallback_invalid_evidence');
+    assert.equal(model.conservativeHours, 168);
+    const next = new BayesianCooldownPolicy(obs).nextEligibleAt(
+      { slug: 'jane-doe' },
+      Date.parse('2026-01-02T00:00:00.000Z'),
+    );
+    assert.ok(next !== null && next > Date.parse('2026-01-02T00:00:00.000Z'));
+  });
+
   it('FixedCooldownPolicy remains default-style 7d', () => {
     const p = new FixedCooldownPolicy();
     const at = '2026-01-01T00:00:00.000Z';

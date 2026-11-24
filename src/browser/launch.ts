@@ -62,7 +62,7 @@ export function launchChrome(opts: LaunchChromeOptions): LaunchedChrome {
     cdpUrl,
     stop() {
       try {
-        process.kill(pid);
+        child.kill('SIGTERM');
       } catch {
         /* already exited */
       }

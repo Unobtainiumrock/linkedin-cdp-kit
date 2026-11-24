@@ -51,7 +51,10 @@ function escapeHtml(s: string): string {
 }
 
 export function startReviewServer(opts: ReviewServerOptions): Promise<ReviewServerHandle> {
-  const host = opts.host ?? '127.0.0.1';
+  if (opts.host !== undefined && opts.host !== '127.0.0.1') {
+    throw new Error('review_server_loopback_only');
+  }
+  const host = '127.0.0.1';
   const token = readOrCreateCsrfToken(opts.stateDir);
 
   const server = createServer(async (req, res) => {

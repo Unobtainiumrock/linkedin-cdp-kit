@@ -102,9 +102,8 @@ export async function reactToPost(opts: ReactToPostOptions): Promise<{ status: '
   if (!opts.live) return { status: 'dry_run', activityUrn: opts.activityUrn };
   const session = opts.session;
   if (!session) throw new Error('session required');
-  if (opts.useVoyagerFallback) {
-    return { status: 'voyager_fallback_disabled_by_default' };
-  }
+  // useVoyagerFallback defaults off. No captured react endpoint exists, so the flag never calls a guessed Voyager URL.
+  void opts.useVoyagerFallback;
   const reaction = opts.reaction ?? 'LIKE';
   const raw = await session.evaluate(buildReactExpr(opts.activityUrn, reaction));
   if (raw && typeof raw === 'object') {
@@ -138,11 +137,12 @@ export async function sharePost(opts: SharePostOptions): Promise<{ status: 'dry_
   if (!r?.ok) return { status: 'manual_review', dialogOpen: false };
   const hasText = Boolean(opts.text?.trim());
   if (hasText) {
-    await session.evaluate(`(() => {
+    const filled = (await session.evaluate(`(() => {
       const box = document.querySelector('div[role="dialog"] [contenteditable="true"]');
       if (box) { box.textContent = ${JSON.stringify(opts.text ?? '')}; }
       return { ok: !!box };
-    })()`);
+    })()`)) as { ok?: boolean };
+    if (!filled?.ok) return { status: 'manual_review', dialogOpen: true };
     return { status: 'share_ready', dialogOpen: true };
   }
   return { status: 'share_dialog_open', dialogOpen: true };

@@ -22,6 +22,7 @@ describe('followup nudges', () => {
       { daysAfterSend: 4, maxNudgesPerThread: 2 },
     );
     assert.equal(created.length, 1);
+    assert.equal(created[0]?.status, 'pending');
     assert.match(created[0]?.text ?? '', /^nudge:/);
     rmSync(root, { recursive: true, force: true });
   });
@@ -56,7 +57,25 @@ describe('review server', () => {
       body: 'kind=comment&id=c1&action=approve',
     });
     assert.equal(ok.status, 200);
+    const edited = await fetch(`http://${server.host}:${server.port}/action`, {
+      method: 'POST',
+      headers: { 'x-review-csrf': server.token, 'content-type': 'application/x-www-form-urlencoded' },
+      body: 'kind=draft&id=d1&action=edit&text=Rewritten+draft',
+    });
+    assert.equal(edited.status, 200);
+    const after = (await (await fetch(`http://${server.host}:${server.port}/api/pending`)).json()) as {
+      drafts: Array<{ id: string; text: string }>;
+    };
+    const replacement = after.drafts.find((draft) => draft.id !== 'd1' && draft.text === 'Rewritten draft');
+    assert.ok(replacement);
+    assert.match(replacement?.id ?? '', /^d1-edit-/);
     await server.close();
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('refuses a non-loopback bind', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'lcdp-review-'));
+    await assert.rejects(async () => startReviewServer({ stateDir: root, port: 0, host: '0.0.0.0' }), /loopback/);
     rmSync(root, { recursive: true, force: true });
   });
 });

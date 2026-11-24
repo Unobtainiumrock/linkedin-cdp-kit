@@ -1,7 +1,7 @@
 import type { ActionSession } from './types.js';
 import { actionSleep, navigate, settleDelay } from './cdp-util.js';
 
-export type EasyApplyGate = '2fa_required' | 'captcha' | 'checkpoint' | 'external_apply';
+export type EasyApplyGate = '2fa_required' | 'captcha' | 'checkpoint' | 'external_apply' | 'no_resume_pdf';
 
 export type EasyApplyResult =
   | { status: 'dry_run'; jobUrl: string }
@@ -28,14 +28,21 @@ export const EASY_APPLY_SELECTORS = {
   easyApplyEntry: "button[aria-label^='Easy Apply to']",
   externalApply: "button[aria-label^='Apply to']",
   resumeFileInput: "input[name='file'][type='file']",
-  captchaIframe: "iframe[src*='captcha'], iframe[src*='arkoselabs']",
+  resumeThumbnail: "div[class*='jobs-document-upload__resume-btn-wrapper'] button",
+  captchaIframe: "iframe[src*='captcha'], iframe[src*='arkoselabs'], iframe[src*='funcaptcha']",
   twoFaInput: "input[name='pin']",
 } as const;
 
 const BLOCKER_EXPR = `(() => {
   const url = location.href;
   if (/\\/checkpoint\\//i.test(url)) return { blocked: true, gate: 'checkpoint' };
+  if (/\\/uas\\/login-submit/i.test(url)) return { blocked: true, gate: '2fa_required' };
   if (document.querySelector(${JSON.stringify(EASY_APPLY_SELECTORS.twoFaInput)})) return { blocked: true, gate: '2fa_required' };
+  const heading = document.querySelector('h1, h2');
+  const headingText = ((heading && heading.innerText) || '').toLowerCase();
+  if (headingText.includes('security check') || (headingText.includes('verification') && headingText.includes('code'))) {
+    return { blocked: true, gate: '2fa_required' };
+  }
   if (document.querySelector(${JSON.stringify(EASY_APPLY_SELECTORS.captchaIframe)})) return { blocked: true, gate: 'captcha' };
   const ext = document.querySelector(${JSON.stringify(EASY_APPLY_SELECTORS.externalApply)});
   const easy = document.querySelector(${JSON.stringify(EASY_APPLY_SELECTORS.easyApplyEntry)});
@@ -67,6 +74,19 @@ async function humanPause(): Promise<void> {
   await settleDelay(STEP_PAUSE);
 }
 
+type DomNodeResult = { nodeId?: number; root?: { nodeId?: number } };
+
+async function uploadResumeFile(session: ActionSession, pdfPath: string): Promise<boolean> {
+  const doc = (await session.cdp.send('DOM.getDocument', { depth: 0, pierce: true })) as DomNodeResult;
+  const rootId = doc.root?.nodeId;
+  if (!rootId) return false;
+  const selector = `${EASY_APPLY_SELECTORS.modal} ${EASY_APPLY_SELECTORS.resumeFileInput}`;
+  const found = (await session.cdp.send('DOM.querySelector', { nodeId: rootId, selector })) as DomNodeResult;
+  if (!found.nodeId) return false;
+  await session.cdp.send('DOM.setFileInputFiles', { nodeId: found.nodeId, files: [pdfPath] });
+  return true;
+}
+
 export async function easyApplyToJob(opts: EasyApplyOptions): Promise<EasyApplyResult> {
   const dryRun = opts.dryRun ?? true;
   if (!opts.live) return { status: 'dry_run', jobUrl: opts.jobUrl };
@@ -95,12 +115,13 @@ export async function easyApplyToJob(opts: EasyApplyOptions): Promise<EasyApplyR
       return { status: 'gated', gate: (gate as { gate: EasyApplyGate }).gate, detail: { steps } };
     }
 
-    const resumeNeeded = await session.evaluate(`(() => !!document.querySelector(${JSON.stringify(EASY_APPLY_SELECTORS.resumeFileInput)}))()`);
-    if (resumeNeeded === true && opts.resumePdfPath) {
-      await session.cdp.send('DOM.setFileInputFiles', {
-        files: [opts.resumePdfPath],
-        nodeId: 1,
-      }).catch(() => undefined);
+    const resumeNeeded = await session.evaluate(
+      `(() => !!document.querySelector(${JSON.stringify(`${EASY_APPLY_SELECTORS.modal} ${EASY_APPLY_SELECTORS.resumeFileInput}`)}))()`,
+    );
+    if (resumeNeeded === true) {
+      if (!opts.resumePdfPath) return { status: 'gated', gate: 'no_resume_pdf', detail: { steps } };
+      const uploaded = await uploadResumeFile(session, opts.resumePdfPath);
+      if (!uploaded) return { status: 'manual_review', steps, detail: { reason: 'resume_upload_failed' } };
     }
 
     const next = await session.evaluate(ADVANCE_EXPR);
@@ -118,11 +139,24 @@ export async function easyApplyToJob(opts: EasyApplyOptions): Promise<EasyApplyR
       return { status: 'submitted', steps: steps + 1 };
     }
 
+    const clickSelector = n.selector ?? EASY_APPLY_SELECTORS.modalNext;
+    if (
+      clickSelector === EASY_APPLY_SELECTORS.modalSaveAndExit ||
+      clickSelector === EASY_APPLY_SELECTORS.modalDismiss ||
+      clickSelector === EASY_APPLY_SELECTORS.resumeThumbnail
+    ) {
+      return { status: 'manual_review', steps, detail: { reason: 'forbidden_click' } };
+    }
     await session.evaluate(`(() => {
       const modal = document.querySelector(${JSON.stringify(EASY_APPLY_SELECTORS.modal)});
-      const btn = modal && modal.querySelector(${JSON.stringify(n.selector ?? EASY_APPLY_SELECTORS.modalNext)});
+      const forbidden = ${JSON.stringify(EASY_APPLY_SELECTORS.modalSaveAndExit)};
+      const dismiss = ${JSON.stringify(EASY_APPLY_SELECTORS.modalDismiss)};
+      const thumb = ${JSON.stringify(EASY_APPLY_SELECTORS.resumeThumbnail)};
+      const sel = ${JSON.stringify(clickSelector)};
+      if (sel === forbidden || sel === dismiss || sel === thumb) return { ok: false, reason: 'forbidden_click' };
+      const btn = modal && modal.querySelector(sel);
       if (btn) btn.click();
-      return { ok: !!btn, clicked: ${JSON.stringify(n.selector ?? '')} };
+      return { ok: !!btn, clicked: sel };
     })()`);
     steps += 1;
     await humanPause();

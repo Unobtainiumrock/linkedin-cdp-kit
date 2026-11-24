@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LinkedInSession } from '../src/session.js';
@@ -263,13 +264,26 @@ async function main(): Promise<void> {
     if (sub === 'reject' || sub === 'edit') {
       const id = flag('--id');
       if (!id) throw new Error(`messaging ${sub} --id`);
-      const drafts = readDrafts(stateDir).filter((d) => d.id !== id);
-      if (sub === 'edit') {
-        const text = flag('--text');
-        if (!text) throw new Error('messaging edit --id --text');
-        drafts.push({ id, conversationUrn: flag('--urn') ?? '', inboundFp: 'edited', text, status: 'pending', createdAt: new Date().toISOString() });
+      const existing = readDrafts(stateDir);
+      if (sub === 'reject') {
+        writeDrafts(stateDir, existing.filter((d) => d.id !== id));
+        return;
       }
+      const text = flag('--text');
+      if (!text) throw new Error('messaging edit --id --text');
+      const current = existing.find((d) => d.id === id);
+      const newId = `${id}-edit-${randomBytes(4).toString('hex')}`;
+      const drafts = existing.filter((d) => d.id !== id);
+      drafts.push({
+        id: newId,
+        conversationUrn: current?.conversationUrn || flag('--urn') || '',
+        inboundFp: current?.inboundFp ?? 'edited',
+        text,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      });
       writeDrafts(stateDir, drafts);
+      console.log(JSON.stringify({ id: newId, replaced: id }));
       return;
     }
     if (sub === 'send') {
