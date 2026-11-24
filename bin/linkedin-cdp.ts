@@ -33,6 +33,11 @@ const live = argv.includes('--live');
 const cdpUrl = flag('--cdp-url');
 const stateDir = flag('--state-dir') ?? join(process.cwd(), '.linkedin-cdp-state');
 const hooksPath = flag('--hooks');
+const expectedAccountId = flag('--expected-account');
+
+async function connectActionsLive(): Promise<SessionLinkedInActions> {
+  return connectActions(expectedAccountId ? { publicIdentifier: expectedAccountId } : undefined);
+}
 
 async function connectActions(expectedAccount?: { publicIdentifier?: string }): Promise<SessionLinkedInActions> {
   if (!cdpUrl) throw new Error('--cdp-url is required for live reads/writes');
@@ -60,7 +65,7 @@ async function main(): Promise<void> {
   }
 
   if (domain === 'verify') {
-    const actions = live ? await connectActions() : undefined;
+    const actions = live ? await connectActionsLive() : undefined;
     console.log(
       JSON.stringify(
         await runVerify(store, actions, defaultScoreGrader(0.3), { live, config: DEFAULT_PROFILE_VERIFIER_CONFIG }),
@@ -119,7 +124,7 @@ async function main(): Promise<void> {
     }
     if (sub === 'run') {
       const hooks = hooksPath ? await loadHooksModule(hooksPath) : {};
-      const actions = live ? await connectActions() : undefined;
+      const actions = live ? await connectActionsLive() : undefined;
       const qualified = store.readJson<InviteQueueEntry[]>('invite-qualified.json', []);
       const report = await runInvites({
         store,
@@ -155,7 +160,7 @@ async function main(): Promise<void> {
         console.log(JSON.stringify({ dryRun: true, slug }));
         return;
       }
-      const actions = await connectActions();
+      const actions = await connectActionsLive();
       const profile = await actions.fetchProfile(slug, { posts: true });
       console.log(JSON.stringify({ slug, posts: profile.posts?.length ?? 0 }, null, 2));
       await actions.linkedInSession.close();
@@ -183,7 +188,7 @@ async function main(): Promise<void> {
         console.log(JSON.stringify({ dryRun: true, count: proposals.length }));
         return;
       }
-      const actions = await connectActions();
+      const actions = await connectActionsLive();
       const report = await runCommentExecutor(
         store,
         proposals,
@@ -207,7 +212,7 @@ async function main(): Promise<void> {
     }
     if (sub === 'ingest') {
       if (!cdpUrl) throw new Error('--cdp-url required');
-      const actions = await connectActions();
+      const actions = await connectActionsLive();
       const convos = await actions.listConversations({ days: Number(flag('--days') ?? '14') });
       console.log(JSON.stringify({ count: convos.length, dryRun: !live }));
       return;
@@ -238,7 +243,7 @@ async function main(): Promise<void> {
         console.log(JSON.stringify({ dryRun: true, count: drafts.length }));
         return;
       }
-      const actions = await connectActions();
+      const actions = await connectActionsLive();
       for (const d of drafts) {
         const result = await dispatchOne(
           store,
@@ -256,7 +261,7 @@ async function main(): Promise<void> {
 
   if (domain === 'capture-query-ids') {
     if (!cdpUrl) throw new Error('--cdp-url required');
-    const actions = await connectActions();
+    const actions = await connectActionsLive();
     try {
       const cdp = actions.linkedInSession.session;
       if (!cdp) throw new Error('CDP session missing');
@@ -270,7 +275,7 @@ async function main(): Promise<void> {
 
   if (domain === 'connections') {
     if (!cdpUrl) throw new Error('--cdp-url required');
-    const actions = await connectActions();
+    const actions = await connectActionsLive();
     try {
       console.log(JSON.stringify(await scrapeConnections({ live }), null, 2));
     } finally {
@@ -280,7 +285,7 @@ async function main(): Promise<void> {
   }
 
   if (!cdpUrl) throw new Error('--cdp-url required');
-  const actions = await connectActions();
+  const actions = await connectActionsLive();
   const cmd = domain;
   try {
     switch (cmd) {
